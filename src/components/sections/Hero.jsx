@@ -1,21 +1,20 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Clock, MapPin } from "lucide-react";
+import Image from "next/image";
 
 export default function Hero() {
   return (
     <section className="relative min-h-screen pt-16 flex items-center justify-center overflow-hidden">
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: "url(/hero.jpg)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/90"></div>
-      </div>
+      <Image
+        src="/hero.jpg"
+        alt="Fútbol"
+        fill
+        priority
+        className="object-cover"
+        quality={90}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/90"></div>
 
       <div className="relative z-10 text-center text-white px-4 py-16 max-w-5xl mx-auto">
         <div className="inline-flex items-center gap-2 mb-6 px-5 py-2.5 bg-green-600/90 backdrop-blur-sm rounded-full text-sm font-semibold shadow-lg animate-fade-in">
@@ -31,7 +30,7 @@ export default function Hero() {
           </span>
         </h1>
 
-        <p className="text-lg sm:text-xl md:text-2xl mb-10 text-gray-200 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg sm:text-xl md:text-2xl mb-10 text-gray-200 bg-black/60 backdrop-blur-xs rounded-xl max-w-3xl mx-auto leading-relaxed">
           Encontrá y reservá canchas de fútbol 5, 7 y 11 en tu zona.
           <br className="hidden sm:block" />
           Disponibilidad en tiempo real, confirmación instantánea.
@@ -43,7 +42,7 @@ export default function Hero() {
             className="text-lg px-8 py-6 bg-green-600 hover:bg-green-700 transform transition-all hover:scale-105 hover:shadow-2xl group"
             asChild
           >
-            <Link href="/recursos" className="flex items-center gap-2">
+            <Link href="/canchas" className="flex items-center gap-2">
               Ver canchas disponibles
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>

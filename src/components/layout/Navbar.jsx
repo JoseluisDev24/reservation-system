@@ -6,7 +6,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
 import { Menu } from "lucide-react";
 
 export default function Navbar() {
@@ -22,17 +21,16 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex gap-8 text-base font-semibold">
           <Link
-            href="/recursos"
+            href="/canchas"
             className="text-gray-700 hover:text-green-700 transition-colors relative group"
           >
             Canchas
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-700 transition-all group-hover:w-full"></span>
           </Link>
           <Link
-            href="/como-funciona"
+            href="#como-funciona"
             className="text-gray-700 hover:text-green-700 transition-colors relative group"
           >
             Cómo funciona
@@ -40,7 +38,6 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Desktop Auth Buttons */}
         <div className="hidden md:flex gap-3">
           <Button
             variant="ghost"
@@ -57,7 +54,6 @@ export default function Navbar() {
           </Button>
         </div>
 
-        {/* Mobile Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild className="md:hidden">
             <Button variant="ghost" size="icon" className="hover:bg-green-50">
