@@ -2,12 +2,10 @@ import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import { NextResponse } from "next/server";
 
-// GET /api/canchas - Traer todas las canchas
 export async function GET(request) {
   try {
     await connectDB();
 
-    // Obtener parámetros de búsqueda (opcional)
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type"); // ej: ?type=Fútbol 5
     const available = searchParams.get("available"); // ej: ?available=true

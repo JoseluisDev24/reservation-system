@@ -2,14 +2,12 @@ import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import { NextResponse } from "next/server";
 
-// GET /api/canchas/[id] - Traer una cancha por ID
-export async function GET(request, context) {
+export async function GET(request, {params}) {
   try {
     await connectDB();
 
-    // Await params antes de usarlo
-    const params = await context.params;
-    const cancha = await Resource.findById(params.id);
+    const {id} = await params;
+    const cancha = await Resource.findById(id);
 
     if (!cancha) {
       return NextResponse.json(
