@@ -57,7 +57,7 @@ export default function ResourceCard({ resource }) {
           <p className="text-xs text-gray-500">por hora</p>
         </div>
         <Button className="bg-green-600 hover:bg-green-700" asChild>
-          <Link href={`/reservar/${resource.id}`}>Reservar</Link>
+          <Link href={`/reservar/${resource._id}`}>Reservar</Link>
         </Button>
       </CardFooter>
     </Card>
