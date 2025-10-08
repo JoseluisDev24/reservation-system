@@ -1,42 +1,62 @@
+// src/models/Resource.js
+
 import mongoose from "mongoose";
 
-const ResourceSchema = new mongoose.Schema(
+const resourceSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "El nombre es requerido"],
+      required: true,
       trim: true,
     },
+
     type: {
       type: String,
-      required: [true, "El tipo es requerido"],
-      enum: ["Fútbol 5", "Fútbol 7", "Fútbol 11", "Tenis", "Paddle"],
+      required: true,
+      enum: [
+        "futbol5",
+        "futbol7",
+        "futbol11",
+        "tenis",
+        "padel",
+        "basquet",
+        "voley",
+      ], // ← AGREGAR futbol5, futbol7, futbol11
+      lowercase: true,
     },
+
     capacity: {
       type: Number,
-      required: [true, "La capacidad es requerida"],
+      default: 10,
       min: 1,
     },
+
     pricePerHour: {
       type: Number,
-      required: [true, "El precio es requerido"],
+      required: true,
       min: 0,
     },
+
     image: {
       type: String,
-      required: [true, "La imagen es requerida"],
+      default: "/images/default-cancha.jpg",
     },
-    amenities: {
-      type: [String],
-      default: [],
-    },
-    available: {
-      type: Boolean,
-      default: true,
-    },
+
     description: {
       type: String,
       default: "",
+    },
+
+    amenities: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
+    available: {
+      type: Boolean,
+      default: true,
     },
   },
   {
@@ -44,6 +64,13 @@ const ResourceSchema = new mongoose.Schema(
   }
 );
 
-// Evitar crear el modelo múltiples veces en desarrollo
-export default mongoose.models.Resource ||
-  mongoose.model("Resource", ResourceSchema);
+// Índices para mejorar performance
+resourceSchema.index({ type: 1 });
+resourceSchema.index({ available: 1 });
+resourceSchema.index({ name: 1 });
+
+// Evitar duplicados del modelo
+const Resource =
+  mongoose.models.Resource || mongoose.model("Resource", resourceSchema);
+
+export default Resource;

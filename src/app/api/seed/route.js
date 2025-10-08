@@ -107,4 +107,5 @@ async function seed() {
   }
 }
 
-seed();
+// seed();
+export default seed;

@@ -100,7 +100,7 @@ const reservationSchema = new mongoose.Schema(
 
 // Índices para mejorar performance
 reservationSchema.index({ resourceId: 1, date: 1, startTime: 1 });
-reservationSchema.index({ confirmationCode: 1 });
+// ELIMINADO: reservationSchema.index({ confirmationCode: 1 }); ← YA NO NECESARIO (unique: true ya lo crea)
 reservationSchema.index({ userEmail: 1 });
 reservationSchema.index({ status: 1 });
 
