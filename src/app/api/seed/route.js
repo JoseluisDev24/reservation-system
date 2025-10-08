@@ -1,4 +1,4 @@
-// scripts/seed.js o src/lib/seed.js
+// src/lib/seed.js
 
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
@@ -14,16 +14,17 @@ async function seed() {
     await Reservation.deleteMany({});
     console.log("🗑️  Colecciones limpiadas");
 
-    // Crear canchas
+    // Crear canchas con imágenes de Unsplash
     const canchas = await Resource.insertMany([
       {
-        name: "Cancha 1 - Fútbol 5",
+        name: "Cancha Fútbol 5 - Pocitos",
         type: "futbol5",
         capacity: 10,
-        pricePerHour: 800,
-        image: "/images/cancha1.jpg",
+        pricePerHour: 1200,
+        image:
+          "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=800&q=80",
         description:
-          "Cancha de fútbol 5 con césped sintético de última generación",
+          "Cancha de fútbol 5 con césped sintético de última generación, perfecta para partidos entre amigos",
         amenities: [
           "Vestuarios",
           "Estacionamiento",
@@ -33,23 +34,33 @@ async function seed() {
         available: true,
       },
       {
-        name: "Cancha 2 - Fútbol 7",
+        name: "Cancha Fútbol 7 - Carrasco",
         type: "futbol7",
         capacity: 14,
-        pricePerHour: 1200,
-        image: "/images/cancha2.jpg",
-        description: "Cancha de fútbol 7 techada con césped sintético",
-        amenities: ["Vestuarios", "Estacionamiento", "Techo", "Bar"],
+        pricePerHour: 1800,
+        image:
+          "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80",
+        description:
+          "Cancha de fútbol 7 techada con césped sintético premium y tribuna",
+        amenities: ["Vestuarios", "Estacionamiento", "Techo", "Bar", "Tribuna"],
         available: true,
       },
       {
-        name: "Cancha 3 - Fútbol 11",
+        name: "Cancha Fútbol 11 - Ciudad Vieja",
         type: "futbol11",
         capacity: 22,
-        pricePerHour: 2000,
-        image: "/images/cancha3.jpg",
-        description: "Cancha de fútbol 11 profesional",
-        amenities: ["Vestuarios", "Estacionamiento", "Tribuna", "Cafetería"],
+        pricePerHour: 2500,
+        image:
+          "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80",
+        description:
+          "Cancha de fútbol 11 profesional con césped natural, ideal para torneos",
+        amenities: [
+          "Vestuarios profesionales",
+          "Estacionamiento amplio",
+          "Tribuna",
+          "Cafetería",
+          "Zona de prensa",
+        ],
         available: true,
       },
     ]);
