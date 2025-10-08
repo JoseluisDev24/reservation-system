@@ -1,3 +1,5 @@
+// src/app/reservar/[id]/page.jsx
+
 import ReservationCalendar from "@/components/shared/ReservationCalendar";
 import { notFound } from "next/navigation";
 import connectDB from "@/lib/mongodb";
@@ -113,8 +115,11 @@ export default async function ReservarPage({ params }) {
           )}
         </div>
 
-        {/* Calendario con reservas */}
-        <ReservationCalendar canchaName={cancha.name} reservas={reservas} />
+        {/* Calendario con reservas - CORREGIDO: Pasar el objeto completo */}
+        <ReservationCalendar 
+          cancha={cancha}  // ← CAMBIO IMPORTANTE: objeto completo
+          reservas={reservas} 
+        />
       </div>
     </main>
   );

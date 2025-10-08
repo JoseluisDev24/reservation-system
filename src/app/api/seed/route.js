@@ -1,151 +1,110 @@
-// src/app/api/seed/route.js
+// scripts/seed.js o src/lib/seed.js
+
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import Reservation from "@/models/Reservation";
-import { NextResponse } from "next/server";
 
-export async function GET() {
+async function seed() {
   try {
     await connectDB();
+    console.log("🌱 Iniciando seed...");
 
-    // Limpiar colecciones
+    // Limpiar colecciones existentes
     await Resource.deleteMany({});
     await Reservation.deleteMany({});
+    console.log("🗑️  Colecciones limpiadas");
 
     // Crear canchas
     const canchas = await Resource.insertMany([
       {
-        name: "Cancha Fútbol 5 - Pocitos",
-        description:
-          "Cancha de fútbol 5 con pasto sintético de última generación",
-        type: "Fútbol 5",
+        name: "Cancha 1 - Fútbol 5",
+        type: "futbol5",
         capacity: 10,
-        pricePerHour: 1200,
-        location: "Pocitos, Montevideo",
-        amenities: ["Vestuarios", "Duchas", "Estacionamiento", "Iluminación"],
-        image:
-          "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800",
-        available: true,
-      },
-      {
-        name: "Cancha Tenis - Carrasco",
-        description: "Cancha de tenis profesional con superficie de arcilla",
-        type: "Tenis",
-        capacity: 4,
         pricePerHour: 800,
-        location: "Carrasco, Montevideo",
-        amenities: ["Vestuarios", "Alquiler de raquetas", "Estacionamiento"],
-        image:
-          "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800",
+        image: "/images/cancha1.jpg",
+        description:
+          "Cancha de fútbol 5 con césped sintético de última generación",
+        amenities: [
+          "Vestuarios",
+          "Estacionamiento",
+          "Iluminación LED",
+          "Parrillero",
+        ],
         available: true,
       },
       {
-        name: "Cancha Paddle - Punta Gorda",
-        description: "Cancha de paddle climatizada con vidrio panorámico",
-        type: "Paddle",
-        capacity: 4,
-        pricePerHour: 900,
-        location: "Punta Gorda, Montevideo",
-        amenities: ["Vestuarios", "Climatización", "Buffet", "WiFi"],
-        image:
-          "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800",
+        name: "Cancha 2 - Fútbol 7",
+        type: "futbol7",
+        capacity: 14,
+        pricePerHour: 1200,
+        image: "/images/cancha2.jpg",
+        description: "Cancha de fútbol 7 techada con césped sintético",
+        amenities: ["Vestuarios", "Estacionamiento", "Techo", "Bar"],
+        available: true,
+      },
+      {
+        name: "Cancha 3 - Fútbol 11",
+        type: "futbol11",
+        capacity: 22,
+        pricePerHour: 2000,
+        image: "/images/cancha3.jpg",
+        description: "Cancha de fútbol 11 profesional",
+        amenities: ["Vestuarios", "Estacionamiento", "Tribuna", "Cafetería"],
         available: true,
       },
     ]);
 
-    // Crear reservas de ejemplo para cada cancha
+    console.log(`✅ ${canchas.length} canchas creadas`);
+
+    // Crear algunas reservas de ejemplo
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const reservas = [];
+    const reservasEjemplo = [];
 
-    // Reservas para Fútbol 5 (próximos 7 días)
-    for (let i = 0; i < 7; i++) {
+    // Reservas para los próximos 7 días
+    for (let dia = 0; dia < 7; dia++) {
       const fecha = new Date(hoy);
-      fecha.setDate(fecha.getDate() + i);
+      fecha.setDate(fecha.getDate() + dia);
 
-      // Reserva a las 18:00
-      reservas.push({
-        resourceId: canchas[0]._id,
-        userName: `Equipo ${i + 1}`,
-        userEmail: `equipo${i + 1}@ejemplo.com`,
-        userPhone: "+598 99 123 456",
-        date: fecha,
-        startTime: "18:00",
-        endTime: "19:00",
-        status: i % 2 === 0 ? "confirmed" : "pending",
-        totalPrice: 1200,
-        confirmationCode: `CONF-${Date.now()}-${i}`,
-      });
+      // 2-4 reservas por día
+      const numReservas = Math.floor(Math.random() * 3) + 2;
 
-      // Reserva a las 20:00 (solo algunos días)
-      if (i % 2 === 0) {
-        reservas.push({
-          resourceId: canchas[0]._id,
-          userName: "Los Amigos FC",
-          userEmail: "amigosfc@ejemplo.com",
-          userPhone: "+598 99 654 321",
+      for (let i = 0; i < numReservas; i++) {
+        const horaInicio = 8 + Math.floor(Math.random() * 12); // 8 AM - 8 PM
+        const duracion = Math.random() > 0.5 ? 1 : 2; // 1 o 2 horas
+
+        const cancha = canchas[Math.floor(Math.random() * canchas.length)];
+
+        reservasEjemplo.push({
+          resourceId: cancha._id,
           date: fecha,
-          startTime: "20:00",
-          endTime: "21:30",
-          status: "confirmed",
-          totalPrice: 1800,
-          confirmationCode: `CONF-${Date.now()}-${i}-2`,
+          startTime: `${horaInicio.toString().padStart(2, "0")}:00`,
+          endTime: `${(horaInicio + duracion).toString().padStart(2, "0")}:00`,
+          userName: `Usuario ${Math.floor(Math.random() * 100)}`,
+          userEmail: `user${Math.floor(Math.random() * 100)}@example.com`,
+          userPhone: `099${Math.floor(Math.random() * 1000000)}`,
+          guests: Math.floor(Math.random() * 10) + 1,
+          notes: "Reserva de ejemplo",
+          totalPrice: cancha.pricePerHour * duracion,
+          confirmationCode: `RES-${Date.now()}-${Math.random()
+            .toString(36)
+            .substr(2, 6)
+            .toUpperCase()}`,
+          status: Math.random() > 0.2 ? "confirmed" : "pending",
         });
       }
     }
 
-    // Reservas para Tenis
-    for (let i = 1; i <= 5; i++) {
-      const fecha = new Date(hoy);
-      fecha.setDate(fecha.getDate() + i);
+    await Reservation.insertMany(reservasEjemplo);
+    console.log(`✅ ${reservasEjemplo.length} reservas creadas`);
 
-      reservas.push({
-        resourceId: canchas[1]._id,
-        userName: `Tenista ${i}`,
-        userEmail: `tenis${i}@ejemplo.com`,
-        userPhone: "+598 99 111 222",
-        date: fecha,
-        startTime: `${16 + i}:00`,
-        endTime: `${17 + i}:00`,
-        status: "confirmed",
-        totalPrice: 800,
-        confirmationCode: `CONF-${Date.now()}-T${i}`,
-      });
-    }
-
-    // Reservas para Paddle
-    for (let i = 0; i < 4; i++) {
-      const fecha = new Date(hoy);
-      fecha.setDate(fecha.getDate() + i + 2);
-
-      reservas.push({
-        resourceId: canchas[2]._id,
-        userName: `Paddle Team ${i + 1}`,
-        userEmail: `paddle${i + 1}@ejemplo.com`,
-        userPhone: "+598 99 333 444",
-        date: fecha,
-        startTime: "19:00",
-        endTime: "20:30",
-        status: i === 0 ? "pending" : "confirmed",
-        totalPrice: 1350,
-        confirmationCode: `CONF-${Date.now()}-P${i}`,
-      });
-    }
-
-    await Reservation.insertMany(reservas);
-
-    return NextResponse.json({
-      success: true,
-      message: `${canchas.length} canchas y ${reservas.length} reservas creadas`,
-      canchas: canchas.length,
-      reservas: reservas.length,
-    });
+    console.log("🎉 Seed completado exitosamente");
+    process.exit(0);
   } catch (error) {
-    console.error("Error en seed:", error);
-    return NextResponse.json(
-      { error: "Error al cargar datos de ejemplo", details: error.message },
-      { status: 500 }
-    );
+    console.error("❌ Error en seed:", error);
+    process.exit(1);
   }
 }
+
+seed();
