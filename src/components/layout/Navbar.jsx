@@ -85,6 +85,12 @@ export default function Navbar() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
+              <Link href="/mis-reservas" className="cursor-pointer">
+                Mis reservas
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild></DropdownMenuItem>
+            <DropdownMenuItem asChild>
               <Link
                 href="/register"
                 className="cursor-pointer font-semibold text-green-700"
