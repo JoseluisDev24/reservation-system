@@ -1,6 +1,6 @@
 // src/app/reservar/[id]/page.jsx
 
-import ReservationCalendar from "@/components/shared/ReservationCalendar";
+import ReservationCalendar from "@/components/reservations/ReservationCalendar";
 import { notFound } from "next/navigation";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";

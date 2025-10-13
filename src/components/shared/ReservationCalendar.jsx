@@ -1,4 +1,3 @@
-// src/components/reservations/ReservationCalendar.jsx
 "use client";
 
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";

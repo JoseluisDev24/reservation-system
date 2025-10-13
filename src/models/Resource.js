@@ -1,5 +1,3 @@
-// src/models/Resource.js
-
 import mongoose from "mongoose";
 
 const resourceSchema = new mongoose.Schema(
@@ -21,7 +19,7 @@ const resourceSchema = new mongoose.Schema(
         "padel",
         "basquet",
         "voley",
-      ], // ← AGREGAR futbol5, futbol7, futbol11
+      ], 
       lowercase: true,
     },
 

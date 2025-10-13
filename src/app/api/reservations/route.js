@@ -1,8 +1,5 @@
-// src/app/api/reservations/route.js
-
 import { NextResponse } from "next/server";
 
-// Verificar imports
 let connectDB, Reservation, Resource;
 try {
   connectDB = require("@/lib/mongodb").default;
@@ -16,7 +13,6 @@ export async function POST(request) {
   console.log("📨 API POST /api/reservations - Inicio");
 
   try {
-    // 1. Verificar que los módulos se importaron correctamente
     if (!connectDB || !Reservation || !Resource) {
       console.error("❌ Módulos no disponibles");
       return NextResponse.json(
@@ -25,12 +21,10 @@ export async function POST(request) {
       );
     }
 
-    // 2. Conectar a la base de datos
     console.log("🔌 Conectando a MongoDB...");
     await connectDB();
     console.log("✅ Conectado a MongoDB");
 
-    // 3. Leer el body
     let body;
     try {
       body = await request.json();
@@ -60,7 +54,6 @@ export async function POST(request) {
       notes,
     } = body;
 
-    // 4. Validación básica
     if (
       !resourceId ||
       !startDateTime ||
@@ -76,7 +69,6 @@ export async function POST(request) {
       );
     }
 
-    // 5. Validar que el recurso existe
     console.log("🔍 Buscando recurso:", resourceId);
     const resource = await Resource.findById(resourceId);
     if (!resource) {
@@ -88,13 +80,11 @@ export async function POST(request) {
     }
     console.log("✅ Recurso encontrado:", resource.name);
 
-    // 6. Procesar fechas
     const start = new Date(startDateTime);
     const end = new Date(endDateTime);
 
     console.log("📅 Fechas procesadas:", { start, end });
 
-    // Validar fechas
     if (start < new Date()) {
       return NextResponse.json(
         { error: "No podés reservar en el pasado" },
@@ -109,7 +99,6 @@ export async function POST(request) {
       );
     }
 
-    // 7. Extraer date, startTime, endTime
     const date = new Date(start);
     date.setHours(0, 0, 0, 0);
 
@@ -124,7 +113,6 @@ export async function POST(request) {
 
     console.log("🕐 Horarios extraídos:", { date, startTime, endTime });
 
-    // 8. Verificar disponibilidad
     console.log("🔍 Verificando disponibilidad...");
     const existingReservation = await Reservation.findOne({
       resourceId,
@@ -146,20 +134,17 @@ export async function POST(request) {
     }
     console.log("✅ Horario disponible");
 
-    // 9. Calcular precio
     const durationMs = end - start;
     const durationHours = durationMs / (1000 * 60 * 60);
     const totalPrice = Math.round(resource.pricePerHour * durationHours);
 
     console.log("💰 Precio calculado:", { durationHours, totalPrice });
 
-    // 10. Generar código de confirmación
     const confirmationCode = `RES-${Date.now()}-${Math.random()
       .toString(36)
       .substr(2, 6)
       .toUpperCase()}`;
 
-    // 11. Crear la reserva
     console.log("💾 Creando reserva...");
     const reservation = await Reservation.create({
       resourceId,
@@ -178,7 +163,6 @@ export async function POST(request) {
 
     console.log("✅ Reserva creada:", reservation._id);
 
-    // 12. Poblar datos del recurso
     await reservation.populate("resourceId");
 
     console.log("🎉 Proceso completado exitosamente");

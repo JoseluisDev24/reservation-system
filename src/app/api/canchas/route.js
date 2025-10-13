@@ -7,15 +7,13 @@ export async function GET(request) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get("type"); // ej: ?type=Fútbol 5
-    const available = searchParams.get("available"); // ej: ?available=true
+    const type = searchParams.get("type");
+    const available = searchParams.get("available"); 
 
-    // Construir filtros
     const filters = {};
     if (type) filters.type = type;
     if (available !== null) filters.available = available === "true";
 
-    // Traer canchas
     const canchas = await Resource.find(filters).sort({ createdAt: -1 });
 
     return NextResponse.json({

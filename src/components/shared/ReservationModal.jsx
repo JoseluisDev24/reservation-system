@@ -1,4 +1,3 @@
-// src/components/shared/ReservationModal.jsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -8,7 +7,6 @@ import { X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-// Schema de validación
 const reservationSchema = z.object({
   name: z
     .string()
