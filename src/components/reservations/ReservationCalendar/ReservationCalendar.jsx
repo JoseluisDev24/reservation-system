@@ -17,8 +17,12 @@ import CalendarLegend from "./components/CalendarLegend";
 
 // Utilidades
 import { eventStyleGetter } from "./utils/calendarHelpers";
+import { useRouter } from "next/navigation";
 
 export default function ReservationCalendar({ cancha, reservas = [] }) {
+
+  const router = useRouter();
+
   // ============================================
   // 1. VALIDACIÓN DE PROPS
   // ============================================
@@ -165,19 +169,16 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
         throw new Error(result.error || "Error al crear la reserva");
       }
 
-      // Éxito
       console.log("✅ Reserva creada:", result);
 
       alert(
         `¡Reserva confirmada! 🎉\n\nCódigo: ${result.reservation.confirmationCode}\n\nRecibirás un email con los detalles.`
       );
 
-      // Cerrar modal y limpiar
       setIsModalOpen(false);
       setSelectedSlot(null);
 
-      // Recargar para mostrar la nueva reserva
-      window.location.reload();
+      router.push("/");
     } catch (error) {
       console.error("❌ Error completo:", error);
       alert(`Error al crear la reserva:\n\n${error.message}`);
@@ -186,9 +187,7 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
     }
   };
 
-  // ============================================
-  // 6. RENDER
-  // ============================================
+ 
   return (
     <>
       <div className="bg-white rounded-xl shadow-lg p-4 md:p-8">

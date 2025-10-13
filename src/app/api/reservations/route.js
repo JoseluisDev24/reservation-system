@@ -211,25 +211,49 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const resourceId = searchParams.get("resourceId");
+    const email = searchParams.get("email");
 
-    const filters = { status: { $ne: "cancelled" } };
+    // Construir filtros dinámicamente
+    const filters = {};
 
     if (resourceId) {
       filters.resourceId = resourceId;
+      filters.status = { $ne: "cancelled" }; // Solo activas para calendario
+    }
+
+    if (email) {
+      filters.userEmail = email;
+      // Si busca por email, mostrar TODAS (incluidas canceladas)
     }
 
     const reservations = await Reservation.find(filters)
       .populate("resourceId")
-      .sort({ date: 1, startTime: 1 });
+      .sort({ date: -1, startTime: -1 });
+
+    // Construir startDateTime y endDateTime a partir de date + startTime/endTime
+    const reservationsData = reservations.map((r) => {
+      const obj = r.toObject();
+
+      // Crear Date completo combinando date + startTime
+      const [startHour, startMinute] = obj.startTime.split(":");
+      const startDateTime = new Date(obj.date);
+      startDateTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
+
+      const [endHour, endMinute] = obj.endTime.split(":");
+      const endDateTime = new Date(obj.date);
+      endDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
+
+      return {
+        ...obj,
+        _id: obj._id.toString(),
+        resourceId: obj.resourceId._id.toString(),
+        startDateTime: startDateTime.toISOString(), // ← NUEVO
+        endDateTime: endDateTime.toISOString(), // ← NUEVO
+      };
+    });
 
     return NextResponse.json(
-      {
-        reservations: reservations.map((r) => ({
-          ...r.toObject(),
-          _id: r._id.toString(),
-          resourceId: r.resourceId._id.toString(),
-        })),
-      },
+      { reservations: reservationsData },
       { status: 200 }
     );
   } catch (error) {
