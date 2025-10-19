@@ -107,6 +107,18 @@ export const {
       return session;
     },
 
+    async authorized({ auth, request }) {
+      const { pathname } = request.nextUrl;
+      const isAdminRoute = pathname.startsWith("/admin");
+
+      if (isAdminRoute) {
+        if (!auth) return false; // Sin sesión → redirige a login
+        return auth.user?.role === "admin"; // Solo admins
+      }
+
+      return true; // Otras rutas OK
+    },
+
     // Callback cuando se hace sign in (login)
     async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
