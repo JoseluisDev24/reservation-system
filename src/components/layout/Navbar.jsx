@@ -115,13 +115,21 @@ export default function Navbar() {
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="flex items-center space-x-3 hover:opacity-70 transition-opacity"
                   >
-                    {/* Avatar */}
+                    {/* Avatar - CON SOPORTE PARA IMAGEN */}
                     <div className="relative">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white shadow-sm">
-                        <span className="text-xs font-semibold text-white">
-                          {session.user.name?.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+                      {session.user.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session.user.name}
+                          className="w-8 h-8 rounded-full ring-2 ring-white shadow-sm object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white shadow-sm">
+                          <span className="text-xs font-semibold text-white">
+                            {session.user.name?.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
                       {session.user.role === "admin" && (
                         <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-purple-500 rounded-full border-2 border-white"></div>
                       )}
@@ -204,11 +212,19 @@ export default function Navbar() {
           <div className="md:hidden flex items-center space-x-3">
             {status === "authenticated" && (
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white shadow-sm">
-                  <span className="text-xs font-semibold text-white">
-                    {session.user.name?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name}
+                    className="w-8 h-8 rounded-full ring-2 ring-white shadow-sm object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white shadow-sm">
+                    <span className="text-xs font-semibold text-white">
+                      {session.user.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 {session.user.role === "admin" && (
                   <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-purple-500 rounded-full border-2 border-white"></div>
                 )}
