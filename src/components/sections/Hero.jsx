@@ -9,7 +9,7 @@ export default function Hero() {
       <div
         className="absolute inset-0 bg-cover bg-[center_50%] md:bg-[center_30%]"
         style={{
-          backgroundImage: "url(/hero1.jpg)",
+          backgroundImage: "url(/hero.webp)",
         }}
       ></div>
 
@@ -30,7 +30,7 @@ export default function Hero() {
           </span>
         </h1>
 
-        <p className="text-base sm:text-lg md:text-xl mb-8 text-white max-w-2xl mx-auto leading-relaxed bg-black/50 backdrop-blur-sm py-2 px-4 rounded-2xl border border-white/10">
+        <p className="text-lg md:text-xl mb-16 md:mb-8 text-white max-w-2xl mx-auto leading-relaxed bg-black/50 backdrop-blur-sm py-2 px-4 rounded-xl border border-white/10">
           Encontrá y reservá canchas de fútbol 5, 7 y 11 en tu zona.
           Disponibilidad en tiempo real, confirmación instantánea.
         </p>

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
-let connectDB, Reservation, Resource;
+let connectDB, Reservation, Resource, sendWhatsAppConfirmation;
 try {
   connectDB = require("@/lib/mongodb").default;
   Reservation = require("@/models/Reservation").default;
   Resource = require("@/models/Resource").default;
+  sendWhatsAppConfirmation = require("@/lib/whatsapp").sendWhatsAppConfirmation; // 👈 NUEVO
 } catch (importError) {
   console.error("❌ Error importing modules:", importError);
 }
@@ -164,6 +165,28 @@ export async function POST(request) {
     console.log("✅ Reserva creada:", reservation._id);
 
     await reservation.populate("resourceId");
+
+    // 👇 NUEVO: Enviar confirmación por WhatsApp
+    if (sendWhatsAppConfirmation) {
+      try {
+        const whatsappResult = await sendWhatsAppConfirmation({
+          userName: reservation.userName,
+          userPhone: reservation.userPhone,
+          resourceName: reservation.resourceId.name,
+          date: reservation.date,
+          startTime: reservation.startTime,
+          endTime: reservation.endTime,
+          confirmationCode: reservation.confirmationCode,
+          totalPrice: reservation.totalPrice,
+        });
+
+        console.log("📱 WhatsApp enviado:", whatsappResult);
+      } catch (whatsappError) {
+        console.error("❌ Error al enviar WhatsApp:", whatsappError);
+        // La reserva ya se guardó, solo falló el WhatsApp
+      }
+    }
+    // 👆 FIN NUEVO
 
     console.log("🎉 Proceso completado exitosamente");
 
