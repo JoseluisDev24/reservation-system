@@ -1,4 +1,6 @@
-import { Search, Calendar, CheckCircle } from "lucide-react";
+import { Search, Calendar, CheckCircle, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 export default function HowItWorks() {
   const steps = [
@@ -21,7 +23,10 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section id="como-funciona" className="py-20 bg-gradient-to-b from-gray-100 to-gray-200">
+    <section
+      id="como-funciona"
+      className="py-20 bg-gradient-to-b from-gray-100 to-gray-200 text-center"
+    >
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
@@ -32,7 +37,7 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-6">
           {steps.map((step, index) => (
             <div
               key={index}
@@ -57,6 +62,16 @@ export default function HowItWorks() {
           ))}
         </div>
       </div>
+      <Button
+        size="lg"
+        className="w-11/12 md:w-1/4 text-green-600 text-lg px-8 py-6 bg-gradient-to-r from-gray-900 to-black transform transition-all hover:scale-105 hover:shadow-2xl group shadow-xl"
+        asChild
+      >
+        <Link href="/canchas" className="flex items-center gap-2">
+          Comenzar
+          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </Button>
     </section>
   );
 }

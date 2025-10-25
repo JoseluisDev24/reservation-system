@@ -28,6 +28,7 @@ export async function sendWhatsAppConfirmation(reservationData) {
     );
 
     const message = `
+    Reservá5.
 ¡Reserva confirmada! ⚽
 
 📅 *${formatDate(reservationData.date)}*

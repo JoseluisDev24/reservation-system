@@ -1,11 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Clock, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
+  const handleScroll = () => {
+    const element = document.getElementById("como-funciona");
+  };
   return (
     <section className="relative h-screen pt-16 flex items-center justify-center overflow-hidden">
-      {/* Background Image - Con posición responsive */}
       <div
         className="absolute inset-0 bg-cover bg-[center_50%] md:bg-[center_30%]"
         style={{
@@ -13,7 +17,6 @@ export default function Hero() {
         }}
       ></div>
 
-      {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
 
       <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
@@ -52,13 +55,13 @@ export default function Hero() {
             variant="outline"
             className="text-lg px-8 py-6 bg-white/10 backdrop-blur-md border-2 border-white text-white hover:bg-white hover:text-black transform transition-all hover:scale-105 hover:shadow-2xl shadow-lg"
             asChild
+            onClick={handleScroll}
           >
-            <Link href="/como-funciona">¿Cómo funciona?</Link>
+            <Link href="#como-funciona">¿Cómo funciona?</Link>
           </Button>
         </div>
       </div>
 
-      {/* Scroll Indicator - FUERA DEL CONTENT CONTAINER */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce hidden sm:flex">
         <div className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center p-2">
           <div className="w-1 h-3 bg-white/60 rounded-full animate-pulse"></div>
