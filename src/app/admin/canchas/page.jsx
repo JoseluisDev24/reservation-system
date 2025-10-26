@@ -2,25 +2,22 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { auth } from "@/lib/auth"; // ← CAMBIO AQUÍ
+import { auth } from "@/lib/auth"; 
 import { redirect } from "next/navigation";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import DeleteCanchaButton from "@/components/admin/DeleteCanchaButton";
 
 export default async function CanchasAdminPage() {
-  // 1. VERIFICAR QUE EL USUARIO SEA ADMIN
-  const session = await auth(); // ← CAMBIO AQUÍ (antes era getServerSession)
+  const session = await auth(); 
 
   if (!session || session.user.role !== "admin") {
     redirect("/login");
   }
 
-  // 2. OBTENER TODAS LAS CANCHAS DE LA BASE DE DATOS
   await connectDB();
   const canchas = await Resource.find({}).sort({ createdAt: -1 }).lean();
 
-  // 3. CONVERTIR _id DE MONGODB A STRING
   const canchasFormateadas = canchas.map((cancha) => ({
     ...cancha,
     _id: cancha._id.toString(),
@@ -31,8 +28,7 @@ export default async function CanchasAdminPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 py-8">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">
               🏟️ Gestión de Canchas
