@@ -43,7 +43,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Contacto */}
         <div>
           <h4 className="font-semibold mb-4 text-green-400">Contacto</h4>
           <p className="text-gray-400 hover:text-green-400 transition-colors">

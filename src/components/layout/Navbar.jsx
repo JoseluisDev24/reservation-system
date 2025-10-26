@@ -3,19 +3,34 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
-import { LogOut, LayoutDashboard, Calendar, ChevronDown } from "lucide-react";
+import {
+  LogOut,
+  LayoutDashboard,
+  Calendar,
+  ChevronDown,
+  Building2, // ← NUEVO: Ícono para canchas
+} from "lucide-react";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false); // ← NUEVO
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const adminDropdownRef = useRef(null); // ← NUEVO
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+      }
+      // ← NUEVO: Cerrar dropdown admin al hacer click fuera
+      if (
+        adminDropdownRef.current &&
+        !adminDropdownRef.current.contains(event.target)
+      ) {
+        setIsAdminDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -100,15 +115,57 @@ export default function Navbar() {
 
             {status === "authenticated" && (
               <div className="flex items-center space-x-4">
-                {/* Admin Link */}
+                {/* ⭐ NUEVO: Admin Dropdown */}
                 {session?.user?.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center space-x-1.5 text-sm font-medium text-green-400 hover:text-green-300 transition-colors"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Admin</span>
-                  </Link>
+                  <div className="relative" ref={adminDropdownRef}>
+                    <button
+                      onClick={() =>
+                        setIsAdminDropdownOpen(!isAdminDropdownOpen)
+                      }
+                      className="flex items-center space-x-1.5 text-sm font-medium text-green-400 hover:text-green-300 transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Admin</span>
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform ${
+                          isAdminDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Admin Dropdown Menu */}
+                    {isAdminDropdownOpen && (
+                      <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsAdminDropdownOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <LayoutDashboard className="h-4 w-4 text-green-600" />
+                          <span>Dashboard</span>
+                        </Link>
+
+                        {/* ⭐ NUEVO: Link a Gestión de Canchas */}
+                        <Link
+                          href="/admin/canchas"
+                          onClick={() => setIsAdminDropdownOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <Building2 className="h-4 w-4 text-green-600" />
+                          <span>Gestión de Canchas</span>
+                        </Link>
+
+                        <Link
+                          href="/admin/reservations"
+                          onClick={() => setIsAdminDropdownOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <Calendar className="h-4 w-4 text-green-600" />
+                          <span>Gestión de Reservas</span>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* User Section */}
@@ -150,7 +207,7 @@ export default function Navbar() {
                     </div>
                   </button>
 
-                  {/* Dropdown */}
+                  {/* User Dropdown */}
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* User Info */}
@@ -172,17 +229,6 @@ export default function Navbar() {
 
                       {/* Menu Items */}
                       <div className="py-1">
-                        {session?.user?.role === "admin" && (
-                          <Link
-                            href="/admin"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            <LayoutDashboard className="h-4 w-4 text-green-600" />
-                            <span>Panel Admin</span>
-                          </Link>
-                        )}
-
                         <Link
                           href="/mis-reservas"
                           onClick={() => setIsDropdownOpen(false)}
@@ -311,13 +357,30 @@ export default function Navbar() {
               <>
                 <div className="border-t border-gray-800 my-2"></div>
                 {session?.user?.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
-                  >
-                    Panel Admin
-                  </Link>
+                  <>
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
+                    >
+                      📊 Dashboard
+                    </Link>
+                    {/* ⭐ NUEVO: Link mobile a Gestión de Canchas */}
+                    <Link
+                      href="/admin/canchas"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
+                    >
+                      ⚽ Gestión de Canchas
+                    </Link>
+                    <Link
+                      href="/admin/reservations"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
+                    >
+                      📅 Gestión de Reservas
+                    </Link>
+                  </>
                 )}
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
