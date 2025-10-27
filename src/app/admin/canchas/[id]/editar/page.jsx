@@ -6,6 +6,7 @@ import CanchaForm from "@/components/admin/CanchaForm";
 import Link from "next/link";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
+import { Pencil, AlertTriangle } from "lucide-react"; 
 
 /**
  * Página para editar una cancha existente
@@ -16,21 +17,17 @@ import Resource from "@/models/Resource";
  * 3. Renderiza el formulario en modo "edit" con los datos pre-cargados
  */
 export default async function EditarCanchaPage({ params }) {
-  // Verificar autenticación
   const session = await auth();
 
   if (!session || session.user.role !== "admin") {
     redirect("/login");
   }
 
-  // Obtener ID de la cancha
   const { id } = await params;
 
-  // Buscar cancha en la base de datos
   await connectDB();
   const cancha = await Resource.findById(id).lean();
 
-  // Si no existe, mostrar 404
   if (!cancha) {
     notFound();
   }
@@ -48,9 +45,8 @@ export default async function EditarCanchaPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black pt-20 pb-10 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* BREADCRUMB */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
           <Link
             href="/admin"
@@ -69,10 +65,10 @@ export default async function EditarCanchaPage({ params }) {
           <span className="text-white">Editar</span>
         </div>
 
-        {/* HEADER */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
-            ✏️ Editar Cancha
+            <Pencil className="h-10 w-10 text-green-500 inline-block mr-2" />
+            Editar Cancha
           </h1>
           <p className="text-gray-400">
             Modificá los datos de:{" "}
@@ -80,15 +76,13 @@ export default async function EditarCanchaPage({ params }) {
           </p>
         </div>
 
-        {/* CARD CON EL FORMULARIO */}
         <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
           <CanchaForm mode="edit" initialData={canchaData} canchaId={id} />
         </div>
 
-        {/* INFORMACIÓN */}
         <div className="mt-6 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-          <div className="flex gap-3">
-            <div className="text-2xl">⚠️</div>
+          <div className="flex gap-3 items-start">
+            <AlertTriangle className="h-6 w-6 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="text-yellow-400 font-semibold mb-1">Importante</h3>
               <p className="text-sm text-gray-300">

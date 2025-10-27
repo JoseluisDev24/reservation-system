@@ -26,7 +26,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href="#como-funciona"
+                href="/#como-funciona"
                 className="hover:text-green-400 transition-colors"
               >
                 Cómo funciona
