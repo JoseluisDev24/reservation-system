@@ -26,7 +26,7 @@ export async function uploadImage(imageBase64, folder = "canchas") {
       ],
     });
 
-    return result.secure_url; // https://res.cloudinary.com/...
+    return result.secure_url; 
   } catch (error) {
     console.error("Error subiendo imagen a Cloudinary:", error);
     throw new Error("Error al subir la imagen");
@@ -44,6 +44,7 @@ export async function deleteImage(imageUrl) {
     const fileName = parts[parts.length - 1].split(".")[0]; // "abc"
     const folder = parts[parts.length - 2]; // "canchas"
     const publicId = `${folder}/${fileName}`; // "canchas/abc"
+  
 
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
