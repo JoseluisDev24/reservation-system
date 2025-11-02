@@ -2,13 +2,14 @@ import ResourceCard from "@/components/shared/ResourceCard";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 
-// Esta función se ejecuta en el servidor y llama directo a MongoDB
+export const dynamic = "force-dynamic";
+
+
 async function getCanchas() {
   try {
     await connectDB();
     const canchas = await Resource.find({ available: true }).lean();
 
-    // Convertir _id de ObjectId a string para que funcione en el cliente
     return canchas.map((cancha) => ({
       ...cancha,
       _id: cancha._id.toString(),
