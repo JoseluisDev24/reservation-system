@@ -1,28 +1,37 @@
-// src/app/api/canchas/route.js
-
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth"; // ← CAMBIO AQUÍ
+import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import { uploadImage } from "@/lib/cloudinary";
+import { canchaSchema } from "@/lib/validations/cancha.schema";
+import { z } from "zod";
 
-/**
- * GET /api/canchas
- * Obtiene todas las canchas de la base de datos
- */
 export async function GET(request) {
   try {
     await connectDB();
+
+    const session = await auth();
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
     const available = searchParams.get("available");
 
-    const filters = {};
-    if (type) filters.type = type;
-    if (available !== null) filters.available = available === "true";
+    let filters = {};
 
-    const canchas = await Resource.find(filters).sort({ createdAt: -1 });
+    if (session?.user?.role === "admin") {
+      filters.owner = session.user.id;
+    } else {
+      filters.available = true;
+    }
+
+    if (type) filters.type = type;
+    if (available !== null && session?.user?.role === "admin") {
+      filters.available = available === "true";
+    }
+
+    const canchas = await Resource.find(filters)
+      .populate("owner", "name email")
+      .sort({ createdAt: -1 });
 
     return NextResponse.json({
       success: true,
@@ -38,14 +47,9 @@ export async function GET(request) {
   }
 }
 
-/**
- * POST /api/canchas
- * Crea una nueva cancha
- */
 export async function POST(request) {
   try {
-    // 1. VERIFICAR AUTENTICACIÓN Y AUTORIZACIÓN
-    const session = await auth(); // ← CAMBIO AQUÍ
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json(
@@ -61,7 +65,6 @@ export async function POST(request) {
       );
     }
 
-    // 2. OBTENER DATOS DEL BODY
     const body = await request.json();
     const {
       name,
@@ -71,18 +74,38 @@ export async function POST(request) {
       description,
       amenities,
       imageFile,
+      available,
     } = body;
 
-    // 3. VALIDAR DATOS BÁSICOS
-    if (!name || !type || !capacity || !pricePerHour) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Faltan campos obligatorios: name, type, capacity, pricePerHour",
-        },
-        { status: 400 }
-      );
+    let validatedData;
+    try {
+      const dataToValidate = {
+        name,
+        type,
+        capacity: Number(capacity),
+        pricePerHour: Number(pricePerHour),
+        description: description || "",
+        amenities: amenities || [],
+        available: available !== undefined ? available : true,
+        image: "",
+      };
+
+      validatedData = canchaSchema.parse(dataToValidate);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Datos inválidos",
+            details: error.errors.map((e) => ({
+              field: e.path.join("."),
+              message: e.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
     }
 
     if (!imageFile) {
@@ -92,25 +115,22 @@ export async function POST(request) {
       );
     }
 
-    // 4. SUBIR IMAGEN A CLOUDINARY
     console.log("📤 Subiendo imagen a Cloudinary...");
     const imageUrl = await uploadImage(imageFile, "canchas");
     console.log("✅ Imagen subida exitosamente:", imageUrl);
 
-    // 5. CONECTAR A MONGODB
     await connectDB();
 
-    // 6. CREAR NUEVA CANCHA
     const newCancha = await Resource.create({
-      name,
-      type,
-      capacity: Number(capacity),
-      pricePerHour: Number(pricePerHour),
-      description: description || "",
-      amenities: amenities || [],
+      ...validatedData,
       image: imageUrl,
-      available: true,
+      owner: session.user.id,
     });
+
+    const canchaPopulated = await Resource.findById(newCancha._id).populate(
+      "owner",
+      "name email"
+    );
 
     console.log("✅ Cancha creada exitosamente:", newCancha._id);
 
@@ -118,12 +138,24 @@ export async function POST(request) {
       {
         success: true,
         message: "Cancha creada exitosamente",
-        cancha: newCancha,
+        cancha: canchaPopulated,
       },
       { status: 201 }
     );
   } catch (error) {
     console.error("❌ Error creando cancha:", error);
+
+    if (error.name === "ValidationError") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Error de validación",
+          details: Object.values(error.errors).map((e) => e.message),
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { success: false, error: "Error al crear la cancha: " + error.message },
       { status: 500 }

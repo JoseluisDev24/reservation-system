@@ -11,7 +11,6 @@ const resourceSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      // Actualizamos los valores del enum para que sean más legibles
       enum: [
         "Fútbol 5",
         "Fútbol 7",
@@ -21,7 +20,6 @@ const resourceSchema = new mongoose.Schema(
         "Básquet",
         "Vóley",
       ],
-      // Removemos lowercase para permitir mayúsculas y espacios
     },
 
     capacity: {
@@ -57,18 +55,24 @@ const resourceSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
   },
   {
-    timestamps: true, // Esto agrega automáticamente createdAt y updatedAt ✅
+    timestamps: true,
   }
 );
 
-// Índices para mejorar performance en consultas
 resourceSchema.index({ type: 1 });
 resourceSchema.index({ available: 1 });
 resourceSchema.index({ name: 1 });
+resourceSchema.index({ owner: 1, available: 1 });
 
-// Evitar duplicados del modelo en desarrollo
 const Resource =
   mongoose.models.Resource || mongoose.model("Resource", resourceSchema);
 

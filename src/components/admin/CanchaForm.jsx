@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { canchaSchema } from "@/lib/validations/cancha.schema";
 import Image from "next/image";
-import { Save, X, Loader2, CheckCircle } from "lucide-react"; // ← NUEVO
+import { Save, X, Loader2, CheckCircle } from "lucide-react";
 
 export default function CanchaForm({
   mode = "create",
@@ -24,6 +26,7 @@ export default function CanchaForm({
     formState: { errors },
     watch,
   } = useForm({
+    resolver: zodResolver(canchaSchema), 
     defaultValues: initialData || {
       name: "",
       type: "Fútbol 5",
@@ -31,6 +34,7 @@ export default function CanchaForm({
       pricePerHour: 800,
       description: "",
       available: true,
+      image: "",
     },
   });
 
@@ -131,7 +135,14 @@ export default function CanchaForm({
         router.push("/admin/canchas");
         router.refresh();
       } else {
-        alert("Error: " + result.error);
+        if (result.details && Array.isArray(result.details)) {
+          const errorMessages = result.details
+            .map((detail) => `${detail.field}: ${detail.message}`)
+            .join("\n");
+          alert("Errores de validación:\n\n" + errorMessages);
+        } else {
+          alert("Error: " + result.error);
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -156,7 +167,7 @@ export default function CanchaForm({
         <input
           id="name"
           type="text"
-          {...register("name", { required: "El nombre es obligatorio" })}
+          {...register("name")}
           className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
           placeholder="Ej: Cancha de Fútbol 5 Principal"
         />
@@ -174,7 +185,7 @@ export default function CanchaForm({
         </label>
         <select
           id="type"
-          {...register("type", { required: "El tipo es obligatorio" })}
+          {...register("type")}
           className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
         >
           <option value="Fútbol 5">Fútbol 5</option>
@@ -202,10 +213,7 @@ export default function CanchaForm({
             id="capacity"
             type="number"
             min="1"
-            {...register("capacity", {
-              required: "La capacidad es obligatoria",
-              min: { value: 1, message: "Mínimo 1 persona" },
-            })}
+            {...register("capacity", { valueAsNumber: true })}
             className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="10"
           />
@@ -233,10 +241,7 @@ export default function CanchaForm({
               type="number"
               min="0"
               step="50"
-              {...register("pricePerHour", {
-                required: "El precio es obligatorio",
-                min: { value: 0, message: "El precio no puede ser negativo" },
-              })}
+              {...register("pricePerHour", { valueAsNumber: true })}
               className="w-full pl-8 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
               placeholder="800"
             />
@@ -269,6 +274,11 @@ export default function CanchaForm({
         <p className="mt-1 text-xs text-gray-400">
           Opcional: Agrega detalles sobre la cancha
         </p>
+        {errors.description && (
+          <p className="mt-1 text-sm text-red-500">
+            {errors.description.message}
+          </p>
+        )}
       </div>
 
       <div>

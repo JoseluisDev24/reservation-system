@@ -1,4 +1,3 @@
-// src/app/admin/canchas/page.js
 
 import Link from "next/link";
 import Image from "next/image";
@@ -8,16 +7,39 @@ import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import DeleteCanchaButton from "@/components/admin/DeleteCanchaButton";
 import { Pencil, Plus, Building2, CheckCircle, XCircle } from "lucide-react";
+import mongoose from "mongoose";
 
 export default async function CanchasAdminPage() {
   const session = await auth();
+
+  console.log("🔐 SESSION COMPLETA:", JSON.stringify(session, null, 2));
 
   if (!session || session.user.role !== "admin") {
     redirect("/login");
   }
 
   await connectDB();
-  const canchas = await Resource.find({}).sort({ createdAt: -1 }).lean();
+
+  console.log("👤 session.user.id (original):", session.user.id);
+  console.log("📊 Tipo de session.user.id:", typeof session.user.id);
+
+  const ownerObjectId = new mongoose.Types.ObjectId(session.user.id);
+  const ownerString = session.user.id;
+
+  console.log("🔑 ownerObjectId:", ownerObjectId);
+  console.log("🔑 ownerString:", ownerString);
+
+  const canchas = await Resource.find({
+    $or: [{ owner: ownerObjectId }, { owner: ownerString }],
+  })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  console.log("📦 Canchas encontradas:", canchas.length);
+
+  if (canchas.length > 0) {
+    console.log("🏟️ Primera cancha:", JSON.stringify(canchas[0], null, 2));
+  }
 
   const canchasFormateadas = canchas.map((cancha) => ({
     ...cancha,
@@ -87,7 +109,6 @@ export default async function CanchasAdminPage() {
         </div>
 
         {canchasFormateadas.length === 0 ? (
-          // SI NO HAY CANCHAS
           <div className="bg-gray-800 rounded-lg p-12 text-center border border-gray-700">
             <Building2 className="h-20 w-20 text-gray-600 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-white mb-2">
@@ -106,16 +127,13 @@ export default async function CanchasAdminPage() {
           </div>
         ) : (
           <>
-            {/* ═══════════════════════════════════════════════════════ */}
-            {/* VISTA MOBILE - CARDS */}
-            {/* ═══════════════════════════════════════════════════════ */}
+            
             <div className="md:hidden space-y-4">
               {canchasFormateadas.map((cancha) => (
                 <div
                   key={cancha._id}
                   className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-green-500/50 transition-colors"
                 >
-                  {/* Imagen grande arriba */}
                   <div className="relative w-full h-48">
                     <Image
                       src={cancha.image}
@@ -123,7 +141,6 @@ export default async function CanchasAdminPage() {
                       fill
                       className="object-cover"
                     />
-                    {/* Badge de estado sobre la imagen */}
                     <div className="absolute top-3 right-3">
                       {cancha.available ? (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-full text-xs font-semibold shadow-lg">
@@ -139,9 +156,7 @@ export default async function CanchasAdminPage() {
                     </div>
                   </div>
 
-                  {/* Contenido de la card */}
                   <div className="p-4">
-                    {/* Nombre y tipo */}
                     <div className="mb-3">
                       <h3 className="text-lg font-bold text-white mb-1">
                         {cancha.name}
@@ -151,7 +166,6 @@ export default async function CanchasAdminPage() {
                       </span>
                     </div>
 
-                    {/* Info grid */}
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="bg-gray-900/50 rounded-lg p-3">
                         <p className="text-xs text-gray-400 mb-1">Capacidad</p>
@@ -169,7 +183,6 @@ export default async function CanchasAdminPage() {
                       </div>
                     </div>
 
-                    {/* Amenities */}
                     {cancha.amenities.length > 0 && (
                       <div className="mb-4">
                         <div className="flex flex-wrap gap-1.5">
@@ -190,7 +203,6 @@ export default async function CanchasAdminPage() {
                       </div>
                     )}
 
-                    {/* Botones */}
                     <div className="flex gap-2">
                       <Link
                         href={`/admin/canchas/${cancha._id}/editar`}
@@ -209,11 +221,8 @@ export default async function CanchasAdminPage() {
               ))}
             </div>
 
-            {/* ═══════════════════════════════════════════════════════ */}
-            {/* VISTA DESKTOP - TABLA */}
-            {/* ═══════════════════════════════════════════════════════ */}
+        
             <div className="hidden md:block bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
-              {/* HEADER DE LA TABLA */}
               <div className="grid grid-cols-12 gap-4 p-4 bg-gray-900 border-b border-gray-700 font-semibold text-gray-300">
                 <div className="col-span-1 text-center">Imagen</div>
                 <div className="col-span-3">Nombre</div>
@@ -224,14 +233,12 @@ export default async function CanchasAdminPage() {
                 <div className="col-span-2 text-center">Acciones</div>
               </div>
 
-              {/* FILAS DE LA TABLA */}
               <div className="divide-y divide-gray-700">
                 {canchasFormateadas.map((cancha) => (
                   <div
                     key={cancha._id}
                     className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-750 transition-colors"
                   >
-                    {/* IMAGEN */}
                     <div className="col-span-1 flex justify-center items-center">
                       <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-700">
                         <Image
@@ -243,7 +250,6 @@ export default async function CanchasAdminPage() {
                       </div>
                     </div>
 
-                    {/* NOMBRE */}
                     <div className="col-span-3 flex flex-col justify-center">
                       <p className="font-semibold text-white">{cancha.name}</p>
                       {cancha.amenities.length > 0 && (
@@ -265,14 +271,12 @@ export default async function CanchasAdminPage() {
                       )}
                     </div>
 
-                    {/* TIPO */}
                     <div className="col-span-2 flex items-center">
                       <span className="inline-flex items-center px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm">
                         {cancha.type}
                       </span>
                     </div>
 
-                    {/* CAPACIDAD */}
                     <div className="col-span-1 flex flex-col justify-center items-center">
                       <p className="text-white font-semibold">
                         {cancha.capacity}
@@ -280,7 +284,6 @@ export default async function CanchasAdminPage() {
                       <p className="text-xs text-gray-400">personas</p>
                     </div>
 
-                    {/* PRECIO */}
                     <div className="col-span-2 flex flex-col justify-center items-center">
                       <p className="text-green-500 font-bold text-lg">
                         ${cancha.pricePerHour}
@@ -288,7 +291,6 @@ export default async function CanchasAdminPage() {
                       <p className="text-xs text-gray-400">UYU/hora</p>
                     </div>
 
-                    {/* ESTADO */}
                     <div className="col-span-1 flex justify-center items-center">
                       {cancha.available ? (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-500 rounded-full text-sm font-semibold">
@@ -303,7 +305,6 @@ export default async function CanchasAdminPage() {
                       )}
                     </div>
 
-                    {/* ACCIONES */}
                     <div className="col-span-2 flex justify-center items-center gap-2">
                       <Link
                         href={`/admin/canchas/${cancha._id}/editar`}

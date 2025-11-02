@@ -1,21 +1,19 @@
 // src/app/api/canchas/[id]/route.js
 
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth"; // ← CAMBIO AQUÍ
+import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import { uploadImage, deleteImage } from "@/lib/cloudinary";
+import { canchaSchema } from "@/lib/validations/cancha.schema";
+import { z } from "zod";
 
-/**
- * GET /api/canchas/[id]
- * Obtiene una cancha específica por su ID
- */
 export async function GET(request, { params }) {
   try {
     await connectDB();
 
     const { id } = await params;
-    const cancha = await Resource.findById(id);
+    const cancha = await Resource.findById(id).populate("owner", "name email");
 
     if (!cancha) {
       return NextResponse.json(
@@ -37,14 +35,9 @@ export async function GET(request, { params }) {
   }
 }
 
-/**
- * PUT /api/canchas/[id]
- * Actualiza una cancha existente
- */
 export async function PUT(request, { params }) {
   try {
-    // 1. VERIFICAR AUTENTICACIÓN Y AUTORIZACIÓN
-    const session = await auth(); // ← CAMBIO AQUÍ
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json(
@@ -60,7 +53,6 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // 2. CONECTAR A MONGODB Y BUSCAR CANCHA
     await connectDB();
 
     const { id } = await params;
@@ -73,7 +65,17 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // 3. OBTENER DATOS DEL BODY
+    if (canchaExistente.owner.toString() !== session.user.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "No tienes permisos para editar esta cancha",
+          message: "Solo el propietario puede editar esta cancha",
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const {
       name,
@@ -86,23 +88,42 @@ export async function PUT(request, { params }) {
       imageFile,
     } = body;
 
-    // 4. PREPARAR DATOS PARA ACTUALIZAR
-    const updateData = {
-      name,
-      type,
-      capacity: Number(capacity),
-      pricePerHour: Number(pricePerHour),
-      description: description || "",
-      amenities: amenities || [],
-      available: available !== undefined ? available : true,
-    };
+    let validatedData;
+    try {
+      const dataToValidate = {
+        name,
+        type,
+        capacity: Number(capacity),
+        pricePerHour: Number(pricePerHour),
+        description: description || "",
+        amenities: amenities || [],
+        available: available !== undefined ? available : true,
+        image: canchaExistente.image,
+      };
 
-    // 5. SI HAY NUEVA IMAGEN, SUBIR Y ELIMINAR LA ANTERIOR
+      validatedData = canchaSchema.partial().parse(dataToValidate);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Datos inválidos",
+            details: error.errors.map((e) => ({
+              field: e.path.join("."),
+              message: e.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+
     if (imageFile) {
       console.log("📤 Subiendo nueva imagen a Cloudinary...");
 
       const newImageUrl = await uploadImage(imageFile, "canchas");
-      updateData.image = newImageUrl;
+      validatedData.image = newImageUrl;
 
       console.log("✅ Nueva imagen subida:", newImageUrl);
 
@@ -115,11 +136,17 @@ export async function PUT(request, { params }) {
       }
     }
 
-    // 6. ACTUALIZAR CANCHA EN MONGODB
-    const canchaActualizada = await Resource.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const canchaActualizada = await Resource.findByIdAndUpdate(
+      id,
+      {
+        ...validatedData,
+        owner: canchaExistente.owner,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).populate("owner", "name email");
 
     console.log("✅ Cancha actualizada exitosamente:", canchaActualizada._id);
 
@@ -130,6 +157,18 @@ export async function PUT(request, { params }) {
     });
   } catch (error) {
     console.error("❌ Error actualizando cancha:", error);
+
+    if (error.name === "ValidationError") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Error de validación",
+          details: Object.values(error.errors).map((e) => e.message),
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
@@ -140,14 +179,9 @@ export async function PUT(request, { params }) {
   }
 }
 
-/**
- * DELETE /api/canchas/[id]
- * Elimina una cancha
- */
 export async function DELETE(request, { params }) {
   try {
-    // 1. VERIFICAR AUTENTICACIÓN Y AUTORIZACIÓN
-    const session = await auth(); // ← CAMBIO AQUÍ
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json(
@@ -163,7 +197,6 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // 2. CONECTAR A MONGODB Y BUSCAR CANCHA
     await connectDB();
 
     const { id } = await params;
@@ -176,13 +209,23 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // 3. ELIMINAR IMAGEN DE CLOUDINARY (si no es la default)
+    if (cancha.owner.toString() !== session.user.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "No tienes permisos para eliminar esta cancha",
+          message: "Solo el propietario puede eliminar esta cancha",
+        },
+        { status: 403 }
+      );
+    }
+
     if (cancha.image && !cancha.image.includes("default-cancha")) {
       console.log("🗑️ Eliminando imagen de Cloudinary...");
       await deleteImage(cancha.image);
     }
 
-    // 4. ELIMINAR CANCHA DE MONGODB
+    // 5. ELIMINAR CANCHA DE MONGODB
     await Resource.findByIdAndDelete(id);
 
     console.log("✅ Cancha eliminada exitosamente:", id);

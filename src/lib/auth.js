@@ -11,7 +11,6 @@ export const {
   signOut,
 } = NextAuth({
   providers: [
-    // 🔵 Google OAuth Provider
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -24,7 +23,6 @@ export const {
       },
     }),
 
-    // 🔑 Credentials Provider (email/password)
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -38,7 +36,6 @@ export const {
 
         await connectDB();
 
-        // Buscar usuario por email (incluir password con +password)
         const user = await User.findOne({
           email: credentials.email,
         }).select("+password");
@@ -47,19 +44,16 @@ export const {
           throw new Error("No user found with this email");
         }
 
-        // Verificar que el usuario use credenciales (no Google)
         if (user.provider !== "credentials") {
           throw new Error("Please use Google to sign in");
         }
 
-        // Comparar password
         const isValid = await user.comparePassword(credentials.password);
 
         if (!isValid) {
           throw new Error("Invalid password");
         }
 
-        // Retornar datos del usuario (sin password)
         return {
           id: user._id.toString(),
           email: user.email,
@@ -71,23 +65,18 @@ export const {
     }),
   ],
 
-  // ⚙️ Configuración de sesiones (JWT por defecto)
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 días
+    maxAge: 30 * 24 * 60 * 60, 
   },
 
-  // 📄 Páginas personalizadas
   pages: {
     signIn: "/login",
-    error: "/login", // Redirigir errores al login
+    error: "/login", 
   },
 
-  // 🔐 Callbacks para manejar sesiones y JWT
   callbacks: {
-    // Callback cuando se crea el JWT
     async jwt({ token, user, account }) {
-      // Si es login inicial, agregar info del usuario al token
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -96,9 +85,7 @@ export const {
       return token;
     },
 
-    // Callback cuando se accede a la sesión
     async session({ session, token }) {
-      // Agregar info del token a la sesión
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
@@ -112,40 +99,35 @@ export const {
       const isAdminRoute = pathname.startsWith("/admin");
 
       if (isAdminRoute) {
-        if (!auth) return false; // Sin sesión → redirige a login
-        return auth.user?.role === "admin"; // Solo admins
+        if (!auth) return false; 
+        return auth.user?.role === "admin"; 
       }
 
-      return true; // Otras rutas OK
+      return true;
     },
 
-    // Callback cuando se hace sign in (login)
     async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
         try {
           await connectDB();
 
-          // Buscar o crear usuario de Google
           const existingUser = await User.findOne({ email: user.email });
 
           if (existingUser) {
-            // Actualizar info si cambió
             existingUser.name = user.name || existingUser.name;
             existingUser.image = user.image || existingUser.image;
             await existingUser.save();
 
-            // Agregar role al objeto user para el callback jwt
             user.role = existingUser.role;
             user.id = existingUser._id.toString();
           } else {
-            // Crear nuevo usuario
             const newUser = await User.create({
               name: user.name,
               email: user.email,
               image: user.image,
               provider: "google",
               providerId: account.providerAccountId,
-              role: "user", // Default role
+              role: "user",
             });
 
             user.role = newUser.role;
@@ -159,11 +141,9 @@ export const {
         }
       }
 
-      // Para credentials, ya se manejó en authorize()
       return true;
     },
   },
 
-  // 🐛 Debug en desarrollo
   debug: process.env.NODE_ENV === "development",
 });
