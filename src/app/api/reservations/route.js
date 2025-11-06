@@ -1,19 +1,23 @@
+// src/app/api/reservations/route.js
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth"; // ⭐ NUEVO: Para autenticación
 
 let connectDB, Reservation, Resource, sendWhatsAppConfirmation;
 try {
   connectDB = require("@/lib/mongodb").default;
   Reservation = require("@/models/Reservation").default;
   Resource = require("@/models/Resource").default;
-  sendWhatsAppConfirmation = require("@/lib/whatsapp").sendWhatsAppConfirmation; // 👈 NUEVO
+  sendWhatsAppConfirmation = require("@/lib/whatsapp").sendWhatsAppConfirmation;
 } catch (importError) {
   console.error("❌ Error importing modules:", importError);
 }
+
 
 export async function POST(request) {
   console.log("📨 API POST /api/reservations - Inicio");
 
   try {
+    
     if (!connectDB || !Reservation || !Resource) {
       console.error("❌ Módulos no disponibles");
       return NextResponse.json(
@@ -22,10 +26,26 @@ export async function POST(request) {
       );
     }
 
+   
     console.log("🔌 Conectando a MongoDB...");
     await connectDB();
     console.log("✅ Conectado a MongoDB");
 
+    
+    const session = await auth();
+    
+    if (!session || !session.user) {
+      console.log("❌ Usuario no autenticado");
+      return NextResponse.json(
+        { error: "Debes estar logueado para hacer una reserva" },
+        { status: 401 }
+      );
+    }
+    
+    const userId = session.user.id;
+    console.log("✅ Usuario autenticado:", session.user.name, userId);
+
+   
     let body;
     try {
       body = await request.json();
@@ -55,6 +75,7 @@ export async function POST(request) {
       notes,
     } = body;
 
+    // Validar campos requeridos
     if (
       !resourceId ||
       !startDateTime ||
@@ -70,8 +91,12 @@ export async function POST(request) {
       );
     }
 
+    // ========================================
+    // 5. VERIFICAR QUE LA CANCHA EXISTE
+    // ========================================
     console.log("🔍 Buscando recurso:", resourceId);
     const resource = await Resource.findById(resourceId);
+    
     if (!resource) {
       console.log("❌ Recurso no encontrado");
       return NextResponse.json(
@@ -81,11 +106,15 @@ export async function POST(request) {
     }
     console.log("✅ Recurso encontrado:", resource.name);
 
+    // ========================================
+    // 6. PROCESAR FECHAS Y HORARIOS
+    // ========================================
     const start = new Date(startDateTime);
     const end = new Date(endDateTime);
 
     console.log("📅 Fechas procesadas:", { start, end });
 
+    // Validar que no sea en el pasado
     if (start < new Date()) {
       return NextResponse.json(
         { error: "No podés reservar en el pasado" },
@@ -93,6 +122,7 @@ export async function POST(request) {
       );
     }
 
+    // Validar que fin sea posterior a inicio
     if (end <= start) {
       return NextResponse.json(
         { error: "La hora de fin debe ser posterior a la de inicio" },
@@ -100,13 +130,17 @@ export async function POST(request) {
       );
     }
 
+    // Extraer la fecha (sin hora) para el campo 'date'
     const date = new Date(start);
     date.setHours(0, 0, 0, 0);
 
+    // Extraer hora de inicio (formato "HH:MM")
     const startTime = `${start.getHours().toString().padStart(2, "0")}:${start
       .getMinutes()
       .toString()
       .padStart(2, "0")}`;
+    
+    // Extraer hora de fin (formato "HH:MM")
     const endTime = `${end.getHours().toString().padStart(2, "0")}:${end
       .getMinutes()
       .toString()
@@ -114,14 +148,21 @@ export async function POST(request) {
 
     console.log("🕐 Horarios extraídos:", { date, startTime, endTime });
 
+    // ========================================
+    // 7. VERIFICAR DISPONIBILIDAD
+    // ========================================
     console.log("🔍 Verificando disponibilidad...");
+    
     const existingReservation = await Reservation.findOne({
       resourceId,
       date: date,
-      status: { $ne: "cancelled" },
+      status: { $ne: "cancelled" }, // Excluir canceladas
       $or: [
+        // Caso 1: Reserva existente empieza antes y termina durante
         { startTime: { $lte: startTime }, endTime: { $gt: startTime } },
+        // Caso 2: Reserva existente empieza durante y termina después
         { startTime: { $lt: endTime }, endTime: { $gte: endTime } },
+        // Caso 3: Reserva existente está completamente dentro
         { startTime: { $gte: startTime }, endTime: { $lte: endTime } },
       ],
     });
@@ -135,19 +176,30 @@ export async function POST(request) {
     }
     console.log("✅ Horario disponible");
 
-    const durationMs = end - start;
-    const durationHours = durationMs / (1000 * 60 * 60);
+    // ========================================
+    // 8. CALCULAR PRECIO
+    // ========================================
+    const durationMs = end - start; // Duración en milisegundos
+    const durationHours = durationMs / (1000 * 60 * 60); // Convertir a horas
     const totalPrice = Math.round(resource.pricePerHour * durationHours);
 
     console.log("💰 Precio calculado:", { durationHours, totalPrice });
 
+    // ========================================
+    // 9. GENERAR CÓDIGO DE CONFIRMACIÓN
+    // ========================================
     const confirmationCode = `RES-${Date.now()}-${Math.random()
       .toString(36)
       .substr(2, 6)
       .toUpperCase()}`;
 
+    // ========================================
+    // 10. CREAR RESERVA EN LA BASE DE DATOS
+    // ========================================
     console.log("💾 Creando reserva...");
+    
     const reservation = await Reservation.create({
+      userId, // ⭐ NUEVO: ID del usuario logueado
       resourceId,
       date,
       startTime,
@@ -164,9 +216,12 @@ export async function POST(request) {
 
     console.log("✅ Reserva creada:", reservation._id);
 
+    // Poblar datos de la cancha
     await reservation.populate("resourceId");
 
-    // 👇 NUEVO: Enviar confirmación por WhatsApp
+    // ========================================
+    // 11. ENVIAR WHATSAPP (OPCIONAL)
+    // ========================================
     if (sendWhatsAppConfirmation) {
       try {
         const whatsappResult = await sendWhatsAppConfirmation({
@@ -184,10 +239,13 @@ export async function POST(request) {
       } catch (whatsappError) {
         console.error("❌ Error al enviar WhatsApp:", whatsappError);
         // La reserva ya se guardó, solo falló el WhatsApp
+        // No hacemos que falle todo por esto
       }
     }
-    // 👆 FIN NUEVO
 
+    // ========================================
+    // 12. RESPUESTA EXITOSA
+    // ========================================
     console.log("🎉 Proceso completado exitosamente");
 
     return NextResponse.json(
@@ -203,6 +261,9 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
+    // ========================================
+    // 13. MANEJO DE ERRORES
+    // ========================================
     console.error("❌❌❌ Error crítico en POST /api/reservations:");
     console.error("Error name:", error.name);
     console.error("Error message:", error.message);
@@ -219,10 +280,25 @@ export async function POST(request) {
   }
 }
 
+/**
+ * GET /api/reservations
+ * Obtiene reservas con filtros opcionales
+ * 
+ * Query params:
+ * - resourceId: Filtrar por cancha específica
+ * - email: Filtrar por email del usuario
+ * 
+ * Ejemplos:
+ * GET /api/reservations?resourceId=abc123
+ * GET /api/reservations?email=juan@example.com
+ */
 export async function GET(request) {
   console.log("📨 API GET /api/reservations - Inicio");
 
   try {
+    // ========================================
+    // 1. VERIFICAR MÓDULOS
+    // ========================================
     if (!connectDB || !Reservation) {
       return NextResponse.json(
         { error: "Error en la configuración del servidor" },
@@ -232,11 +308,16 @@ export async function GET(request) {
 
     await connectDB();
 
+    // ========================================
+    // 2. PARSEAR QUERY PARAMS
+    // ========================================
     const { searchParams } = new URL(request.url);
     const resourceId = searchParams.get("resourceId");
     const email = searchParams.get("email");
 
-    // Construir filtros dinámicamente
+    // ========================================
+    // 3. CONSTRUIR FILTROS DINÁMICAMENTE
+    // ========================================
     const filters = {};
 
     if (resourceId) {
@@ -249,10 +330,16 @@ export async function GET(request) {
       // Si busca por email, mostrar TODAS (incluidas canceladas)
     }
 
+    // ========================================
+    // 4. BUSCAR RESERVAS
+    // ========================================
     const reservations = await Reservation.find(filters)
       .populate("resourceId")
       .sort({ date: -1, startTime: -1 });
 
+    // ========================================
+    // 5. SERIALIZAR DATOS
+    // ========================================
     // Construir startDateTime y endDateTime a partir de date + startTime/endTime
     const reservationsData = reservations.map((r) => {
       const obj = r.toObject();
@@ -270,8 +357,8 @@ export async function GET(request) {
         ...obj,
         _id: obj._id.toString(),
         resourceId: obj.resourceId._id.toString(),
-        startDateTime: startDateTime.toISOString(), // ← NUEVO
-        endDateTime: endDateTime.toISOString(), // ← NUEVO
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString(),
       };
     });
 
