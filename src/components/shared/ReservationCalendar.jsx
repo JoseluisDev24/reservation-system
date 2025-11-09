@@ -6,6 +6,7 @@ import { es } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useMemo, useState, useEffect } from "react";
 import ReservationModal from "@/components/shared/ReservationModal";
+import Link from "next/link";
 
 const locales = { es };
 
@@ -18,7 +19,6 @@ const localizer = dateFnsLocalizer({
 });
 
 export default function ReservationCalendar({ cancha, reservas = [] }) {
-  // Validación de seguridad
   if (!cancha) {
     console.error("❌ ReservationCalendar: cancha is undefined");
     return (
@@ -26,12 +26,12 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
         <p className="text-red-800 font-semibold">
           Error: No se pudo cargar la información de la cancha
         </p>
-        <a
+        <Link
           href="/canchas"
           className="text-blue-600 hover:underline mt-2 inline-block"
         >
           Volver al listado
-        </a>
+        </Link>
       </div>
     );
   }
@@ -41,7 +41,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Detectar si es mobile
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -51,25 +50,21 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Generar slots disponibles para mobile
   const availableSlots = useMemo(() => {
     const slots = [];
     const today = new Date();
 
-    // Próximos 7 días
     for (let day = 0; day < 7; day++) {
       const date = new Date(today);
       date.setDate(date.getDate() + day);
       date.setHours(0, 0, 0, 0);
 
-      // Horarios de 8 AM a 11 PM
       for (let hour = 8; hour < 23; hour++) {
         const start = new Date(date);
         start.setHours(hour, 0, 0, 0);
         const end = new Date(date);
         end.setHours(hour + 1, 0, 0, 0);
 
-        // Verificar si está ocupado
         const isOccupied = reservas.some((reserva) => {
           const reservaStart = new Date(reserva.startDateTime);
           const reservaEnd = new Date(reserva.endDateTime);
@@ -88,7 +83,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
     return slots;
   }, [reservas]);
 
-  // Convertir reservas a formato de eventos para el calendario
   const events = useMemo(() => {
     const reservaEvents = reservas.map((reserva) => ({
       title: `${reserva.userName || "Reservado"}`,
@@ -101,7 +95,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
       },
     }));
 
-    // Agregar el slot seleccionado como evento temporal
     if (selectedSlot) {
       reservaEvents.push({
         title: "✓ Horario seleccionado",
@@ -118,7 +111,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
   }, [reservas, selectedSlot]);
 
   const eventStyleGetter = (event) => {
-    // Estilo especial para el slot seleccionado
     if (event.resource?.isSelected) {
       return {
         style: {
@@ -134,7 +126,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
       };
     }
 
-    // Estilos normales para reservas existentes
     const style = {
       backgroundColor:
         event.resource.status === "confirmed" ? "#10b981" : "#f59e0b",
@@ -152,7 +143,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
   const handleSelectSlot = (slotInfo) => {
     console.log("Slot seleccionado:", slotInfo);
 
-    // Verificar que el slot no esté ocupado
     const isOccupied = reservas.some((reserva) => {
       const reservaStart = new Date(reserva.startDateTime);
       const reservaEnd = new Date(reserva.endDateTime);
@@ -179,17 +169,14 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
 
   const handleSelectEvent = (event) => {
     console.log("Evento clickeado:", event);
-    // Mostrar detalles de la reserva (próximamente)
   };
 
-  // Handler para abrir el modal
   const handleConfirmClick = () => {
     if (!selectedSlot) {
       alert("Por favor seleccioná un horario");
       return;
     }
 
-    // Debug: verificar que cancha tenga todos los datos
     console.log("🔍 Debug - Datos de cancha:", {
       _id: cancha._id,
       name: cancha.name,
@@ -200,7 +187,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
     setIsModalOpen(true);
   };
 
-  // Handler para el submit del formulario
   const handleReservationSubmit = async (formData) => {
     setIsSubmitting(true);
 
@@ -227,7 +213,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
       console.log("📥 Response status:", response.status);
       console.log("📥 Response headers:", response.headers.get("content-type"));
 
-      // Verificar si la respuesta es JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const textResponse = await response.text();
@@ -247,18 +232,15 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
         throw new Error(result.error || "Error al crear la reserva");
       }
 
-      // Éxito 🎉
       console.log("✅ Reserva creada:", result);
 
       alert(
         `¡Reserva confirmada! 🎉\n\nCódigo: ${result.reservation.confirmationCode}\n\nRecibirás un email con los detalles.`
       );
 
-      // Cerrar modal y limpiar
       setIsModalOpen(false);
       setSelectedSlot(null);
 
-      // Recargar para mostrar la nueva reserva
       window.location.reload();
     } catch (error) {
       console.error("❌ Error completo:", error);
@@ -284,7 +266,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
           </p>
         </div>
 
-        {/* Vista MOBILE - Lista de horarios */}
         {isMobile ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4 p-3 bg-blue-50 rounded-lg">
@@ -331,7 +312,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
             </div>
           </div>
         ) : (
-          /* Vista DESKTOP - Calendario */
           <div style={{ height: 600 }}>
             <Calendar
               localizer={localizer}
@@ -431,7 +411,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
         )}
       </div>
 
-      {/* Modal de confirmación */}
       <ReservationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

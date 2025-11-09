@@ -1,11 +1,9 @@
-// src/components/reservations/ReservationCalendar/components/DesktopCalendar.jsx
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { es } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { calendarMessages, calendarConfig } from "../utils/calendarHelpers";
 
-// Configuración del localizador (español)
 const locales = { es };
 const localizer = dateFnsLocalizer({
   format,
@@ -15,10 +13,6 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-/**
- * Componente del calendario para vista desktop
- * Envuelve react-big-calendar con nuestra configuración
- */
 export default function DesktopCalendar({
   events,
   currentView,

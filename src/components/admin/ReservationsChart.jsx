@@ -31,25 +31,25 @@ export default function ReservationsChart({ data }) {
         data={data}
         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
       >
-        {/* Grid de fondo */}
+        {/* Grid de fondo - OSCURO */}
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="#f0f0f0"
+          stroke="#374151"
           vertical={false}
         />
 
-        {/* Eje X (días) */}
+        {/* Eje X (días) - GRIS CLARO */}
         <XAxis
           dataKey="day"
-          tick={{ fill: "#6b7280", fontSize: 12 }}
-          axisLine={{ stroke: "#e5e7eb" }}
+          tick={{ fill: "#9ca3af", fontSize: 12 }}
+          axisLine={{ stroke: "#4b5563" }}
           tickLine={false}
         />
 
-        {/* Eje Y (cantidad) */}
+        {/* Eje Y (cantidad) - GRIS CLARO */}
         <YAxis
-          tick={{ fill: "#6b7280", fontSize: 12 }}
-          axisLine={{ stroke: "#e5e7eb" }}
+          tick={{ fill: "#9ca3af", fontSize: 12 }}
+          axisLine={{ stroke: "#4b5563" }}
           tickLine={false}
           allowDecimals={false}
         />
@@ -60,7 +60,7 @@ export default function ReservationsChart({ data }) {
           cursor={{ fill: "rgba(16, 185, 129, 0.1)" }}
         />
 
-        {/* Barras con animación */}
+        {/* Barras con animación - VERDE NEÓN */}
         <Bar
           dataKey="count"
           fill="#10b981"

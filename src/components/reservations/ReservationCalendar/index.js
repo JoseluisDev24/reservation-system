@@ -4,4 +4,4 @@
  * Archivo de re-exportación
  * Permite hacer imports limpios desde otros archivos
  */
-export { default } from "./ReservationCalendar";
+export { default } from "./components/ReservationCalendar";

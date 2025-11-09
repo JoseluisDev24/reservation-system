@@ -3,33 +3,25 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import connectDB from "@/lib/mongodb";
 import Reservation from "@/models/Reservation";
-import Resource from "@/models/Resource"; // ⭐ AGREGADO
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
+import CancelReservationButton from "@/components/reservations/CancelReservationButton";
 
 export default async function MisReservasPage() {
-  // ========================================
-  // 1. VERIFICAR AUTENTICACIÓN
-  // ========================================
   const session = await auth();
 
-  // Si no está logueado, redirigir a login
   if (!session) {
     redirect("/api/auth/signin");
   }
 
-  // ========================================
-  // 2. BUSCAR RESERVAS DEL USUARIO
-  // ========================================
   await connectDB();
 
   const reservations = await Reservation.find({
-    userId: session.user.id, // ⭐ Filtrar por el usuario logueado
+    userId: session.user.id,
   })
     .populate("resourceId", "name type image")
     .sort({ date: -1 })
     .lean();
 
-  // Serializar para Next.js
   const reservationsData = reservations.map((r) => ({
     id: r._id.toString(),
     resource: r.resourceId
@@ -52,13 +44,9 @@ export default async function MisReservasPage() {
     confirmationCode: r.confirmationCode,
   }));
 
-  // ========================================
-  // 3. RENDERIZAR
-  // ========================================
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
       <div className="max-w-4xl mx-auto px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-light text-gray-900 mb-2">
             Mis Reservas
@@ -68,7 +56,6 @@ export default async function MisReservasPage() {
           </p>
         </div>
 
-        {/* Lista de Reservas */}
         {reservationsData.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
             <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -93,7 +80,6 @@ export default async function MisReservasPage() {
                 className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition"
               >
                 <div className="flex items-start justify-between">
-                  {/* Info de la reserva */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <h3 className="text-lg font-semibold text-gray-900">
@@ -130,7 +116,6 @@ export default async function MisReservasPage() {
                     </div>
                   </div>
 
-                  {/* Imagen de la cancha */}
                   {reserva.resource.image && (
                     <img
                       src={reserva.resource.image}
@@ -139,6 +124,17 @@ export default async function MisReservasPage() {
                     />
                   )}
                 </div>
+
+                {reserva.status === "confirmed" && (
+                  <div className="border-t border-gray-100 pt-4 mt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        ¿Cambió tus planes?
+                      </span>
+                      <CancelReservationButton reservationId={reserva.id} />
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -148,7 +144,6 @@ export default async function MisReservasPage() {
   );
 }
 
-// Badge de estado
 function StatusBadge({ status }) {
   const styles = {
     confirmed: "bg-green-50 text-green-700 ring-green-600/20",
