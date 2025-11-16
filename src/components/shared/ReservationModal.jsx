@@ -3,7 +3,20 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { X } from "lucide-react";
+import {
+  X,
+  Calendar,
+  Clock,
+  MapPin,
+  DollarSign,
+  User,
+  Mail,
+  Phone,
+  Users,
+  FileText,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -59,7 +72,6 @@ export default function ReservationModal({
     onSubmit(data);
   };
 
-  // Calcular duración y precio
   const durationMs = selectedSlot.end - selectedSlot.start;
   const durationHours = durationMs / (1000 * 60 * 60);
   const totalPrice = Math.round(cancha.pricePerHour * durationHours);
@@ -67,7 +79,6 @@ export default function ReservationModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-xl">
           <div className="flex justify-between items-start">
             <div>
@@ -84,34 +95,43 @@ export default function ReservationModal({
           </div>
         </div>
 
-        {/* Resumen de la reserva */}
         <div className="bg-blue-50 p-4 m-4 rounded-lg border border-blue-200">
-          <h3 className="font-semibold text-blue-900 mb-2">
-            📅 Resumen de tu reserva
+          <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Resumen de tu reserva
           </h3>
-          <div className="space-y-1 text-sm text-blue-800">
-            <p>
-              <strong>Fecha:</strong>{" "}
-              {format(selectedSlot.start, "EEEE d 'de' MMMM", { locale: es })}
-            </p>
-            <p>
-              <strong>Horario:</strong> {format(selectedSlot.start, "HH:mm")} -{" "}
-              {format(selectedSlot.end, "HH:mm")} ({durationHours}h)
-            </p>
-            <p>
-              <strong>Cancha:</strong> {cancha.name}
-            </p>
-            <p className="text-lg font-bold text-blue-900 mt-2">
-              Total: ${totalPrice}
-            </p>
+          <div className="space-y-2 text-sm text-blue-800">
+            <div className="flex items-start gap-2">
+              <Calendar className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <div>
+                <strong>Fecha:</strong>{" "}
+                {format(selectedSlot.start, "EEEE d 'de' MMMM", { locale: es })}
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <Clock className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <div>
+                <strong>Horario:</strong> {format(selectedSlot.start, "HH:mm")}{" "}
+                - {format(selectedSlot.end, "HH:mm")} ({durationHours}h)
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <div>
+                <strong>Cancha:</strong> {cancha.name}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-lg font-bold text-blue-900 mt-3 pt-2 border-t border-blue-200">
+              <DollarSign className="h-5 w-5" />
+              <span>Total: ${totalPrice}</span>
+            </div>
           </div>
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit(onFormSubmit)} className="p-6 space-y-4">
-          {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+              <User className="h-4 w-4" />
               Nombre completo *
             </label>
             <input
@@ -128,9 +148,9 @@ export default function ReservationModal({
             )}
           </div>
 
-          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+              <Mail className="h-4 w-4" />
               Email *
             </label>
             <input
@@ -149,9 +169,9 @@ export default function ReservationModal({
             )}
           </div>
 
-          {/* Teléfono */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+              <Phone className="h-4 w-4" />
               Teléfono *
             </label>
             <input
@@ -170,9 +190,9 @@ export default function ReservationModal({
             )}
           </div>
 
-          {/* Cantidad de personas */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+              <Users className="h-4 w-4" />
               Cantidad de personas *
             </label>
             <input
@@ -192,9 +212,9 @@ export default function ReservationModal({
             )}
           </div>
 
-          {/* Notas */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+              <FileText className="h-4 w-4" />
               Notas adicionales (opcional)
             </label>
             <textarea
@@ -211,7 +231,6 @@ export default function ReservationModal({
             )}
           </div>
 
-          {/* Botones */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
@@ -227,36 +246,21 @@ export default function ReservationModal({
               className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
-                <span className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   Procesando...
                 </span>
               ) : (
-                "✅ Confirmar Reserva"
+                <span className="flex items-center justify-center gap-2">
+                  <CheckCircle className="h-5 w-5" />
+                  Confirmar Reserva
+                </span>
               )}
             </button>
           </div>
 
-          <p className="text-xs text-gray-500 text-center mt-4">
+          <p className="text-xs text-gray-500 text-center mt-4 flex items-center justify-center gap-1">
+            <Mail className="h-3 w-3" />
             Recibirás un email de confirmación con todos los detalles
           </p>
         </form>

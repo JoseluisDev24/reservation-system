@@ -141,7 +141,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
   };
 
   const handleSelectSlot = (slotInfo) => {
-    console.log("Slot seleccionado:", slotInfo);
 
     const isOccupied = reservas.some((reserva) => {
       const reservaStart = new Date(reserva.startDateTime);
@@ -167,22 +166,11 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
     setCurrentView(view);
   };
 
-  const handleSelectEvent = (event) => {
-    console.log("Evento clickeado:", event);
-  };
-
   const handleConfirmClick = () => {
     if (!selectedSlot) {
       alert("Por favor seleccioná un horario");
       return;
     }
-
-    console.log("🔍 Debug - Datos de cancha:", {
-      _id: cancha._id,
-      name: cancha.name,
-      pricePerHour: cancha.pricePerHour,
-      fullCancha: cancha,
-    });
 
     setIsModalOpen(true);
   };
@@ -202,16 +190,11 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
         notes: formData.notes || "",
       };
 
-      console.log("📤 Enviando reserva:", reservationData);
-
       const response = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reservationData),
       });
-
-      console.log("📥 Response status:", response.status);
-      console.log("📥 Response headers:", response.headers.get("content-type"));
 
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
@@ -226,13 +209,10 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
       }
 
       const result = await response.json();
-      console.log("📥 Response body:", result);
 
       if (!response.ok) {
         throw new Error(result.error || "Error al crear la reserva");
       }
-
-      console.log("✅ Reserva creada:", result);
 
       alert(
         `¡Reserva confirmada! 🎉\n\nCódigo: ${result.reservation.confirmationCode}\n\nRecibirás un email con los detalles.`
@@ -342,7 +322,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
               max={new Date(2025, 0, 1, 23, 0, 0)}
               selectable
               onSelectSlot={handleSelectSlot}
-              onSelectEvent={handleSelectEvent}
               eventPropGetter={eventStyleGetter}
             />
           </div>

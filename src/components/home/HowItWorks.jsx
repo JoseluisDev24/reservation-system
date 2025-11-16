@@ -1,6 +1,5 @@
 import { Search, Calendar, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Button } from "../ui/button";
 
 export default function HowItWorks() {
   const steps = [
@@ -8,24 +7,26 @@ export default function HowItWorks() {
       icon: Search,
       title: "Buscá tu cancha",
       description:
-        "Explorá canchas disponibles en tu zona con fotos y precios.",
+        "Explorá canchas disponibles en tu zona con fotos y precios en tiempo real.",
     },
     {
       icon: Calendar,
       title: "Elegí fecha y hora",
-      description: "Seleccioná el día y horario que mejor te convenga.",
+      description:
+        "Seleccioná el día y horario que mejor te convenga en nuestro calendario interactivo.",
     },
     {
       icon: CheckCircle,
       title: "Confirmá y jugá",
-      description: "Recibí tu confirmación al instante y presentate a jugar.",
+      description:
+        "Recibí tu confirmación por WhatsApp al instante y presentate a jugar.",
     },
   ];
 
   return (
     <section
       id="como-funciona"
-      className="py-20 bg-gradient-to-b from-gray-100 to-gray-200 text-center"
+      className="py-20 bg-gradient-to-b from-gray-100 to-gray-200"
     >
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-16">
@@ -37,7 +38,7 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {steps.map((step, index) => (
             <div
               key={index}
@@ -61,17 +62,17 @@ export default function HowItWorks() {
             </div>
           ))}
         </div>
+
+        <div className="text-center">
+          <Link
+            href="/canchas"
+            className="w-full sm:w-auto max-w-md mx-auto inline-flex items-center justify-center gap-2 text-lg px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold transform transition-all hover:scale-105 hover:shadow-2xl group shadow-xl"
+          >
+            Comenzar ahora
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
       </div>
-      <Button
-        size="lg"
-        className="w-11/12 md:w-1/4 text-green-600 text-lg px-8 py-6 bg-gradient-to-r from-gray-900 to-black transform transition-all hover:scale-105 hover:shadow-2xl group shadow-xl"
-        asChild
-      >
-        <Link href="/canchas" className="flex items-center gap-2">
-          Comenzar
-          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </Button>
     </section>
   );
 }

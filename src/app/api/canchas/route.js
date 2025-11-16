@@ -115,9 +115,7 @@ export async function POST(request) {
       );
     }
 
-    console.log("📤 Subiendo imagen a Cloudinary...");
     const imageUrl = await uploadImage(imageFile, "canchas");
-    console.log("✅ Imagen subida exitosamente:", imageUrl);
 
     await connectDB();
 
@@ -132,8 +130,6 @@ export async function POST(request) {
       "name email"
     );
 
-    console.log("✅ Cancha creada exitosamente:", newCancha._id);
-
     return NextResponse.json(
       {
         success: true,
@@ -143,8 +139,6 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("❌ Error creando cancha:", error);
-
     if (error.name === "ValidationError") {
       return NextResponse.json(
         {

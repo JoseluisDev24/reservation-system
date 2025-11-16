@@ -14,9 +14,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// 🆕 FUENTE DEPORTIVA PARA EL NAVBAR
 const bebasNeue = Bebas_Neue({
-  weight: "400", // Bebas solo tiene un peso disponible
+  weight: "400", 
   subsets: ["latin"],
   variable: "--font-bebas",
 });

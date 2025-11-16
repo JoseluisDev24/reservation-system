@@ -16,8 +16,7 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      // No required porque Google OAuth no necesita password
-      select: false, // No devolver password por defecto en queries
+      select: false,
     },
     image: {
       type: String,
@@ -28,7 +27,6 @@ const UserSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
-    // OAuth providers info
     provider: {
       type: String,
       enum: ["credentials", "google"],
@@ -40,13 +38,11 @@ const UserSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // createdAt, updatedAt
+    timestamps: true,
   }
 );
 
-// Método para hashear password antes de guardar
 UserSchema.pre("save", async function (next) {
-  // Solo hashear si el password fue modificado o es nuevo
   if (!this.isModified("password") || !this.password) {
     return next();
   }
@@ -60,7 +56,6 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
-// Método para comparar passwords
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   if (!this.password) {
     return false;

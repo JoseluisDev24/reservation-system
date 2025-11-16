@@ -6,16 +6,8 @@ import CanchaForm from "@/components/admin/CanchaForm";
 import Link from "next/link";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
-import { Pencil, AlertTriangle } from "lucide-react"; 
+import { Pencil, AlertTriangle } from "lucide-react";
 
-/**
- * Página para editar una cancha existente
- *
- * Server Component que:
- * 1. Verifica que el usuario sea admin
- * 2. Busca la cancha por ID
- * 3. Renderiza el formulario en modo "edit" con los datos pre-cargados
- */
 export default async function EditarCanchaPage({ params }) {
   const session = await auth();
 
@@ -32,7 +24,6 @@ export default async function EditarCanchaPage({ params }) {
     notFound();
   }
 
-  // Formatear datos para el formulario
   const canchaData = {
     name: cancha.name,
     type: cancha.type,

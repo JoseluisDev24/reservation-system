@@ -8,24 +8,24 @@ import {
   LayoutDashboard,
   Calendar,
   ChevronDown,
-  Building2, // ← NUEVO: Ícono para canchas
+  Building2,
+  Home,
+  List,
 } from "lucide-react";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false); // ← NUEVO
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const adminDropdownRef = useRef(null); // ← NUEVO
+  const adminDropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
-      // ← NUEVO: Cerrar dropdown admin al hacer click fuera
       if (
         adminDropdownRef.current &&
         !adminDropdownRef.current.contains(event.target)
@@ -38,14 +38,11 @@ export default function Navbar() {
   }, []);
 
   return (
-    // 🖤 NEGRO CON BORDE VERDE NEÓN
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-gray-900 to-black shadow-2xl border-b-2 border-green-500">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* ⚡ LOGO - BEBAS NEUE + MAYÚSCULAS */}
           <Link href="/" className="group flex items-center space-x-3">
             <div className="relative">
-              {/* Pelota animada verde neón */}
               <div className="w-3 h-3 bg-green-400 rounded-full"></div>
               <div className="absolute top-0 left-0 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
             </div>
@@ -54,7 +51,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/"
@@ -71,13 +67,6 @@ export default function Navbar() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
-              href="/"
-              className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group"
-            >
-              Reservar
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link
               href="/mis-reservas"
               className="text-sm font-medium text-gray-300 hover:text-white transition-colors relative group"
             >
@@ -86,7 +75,6 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right Section - Desktop */}
           <div className="hidden md:flex items-center space-x-6">
             {status === "loading" && (
               <div className="flex items-center space-x-2">
@@ -115,7 +103,6 @@ export default function Navbar() {
 
             {status === "authenticated" && (
               <div className="flex items-center space-x-4">
-                {/* ⭐ NUEVO: Admin Dropdown */}
                 {session?.user?.role === "admin" && (
                   <div className="relative" ref={adminDropdownRef}>
                     <button
@@ -133,7 +120,6 @@ export default function Navbar() {
                       />
                     </button>
 
-                    {/* Admin Dropdown Menu */}
                     {isAdminDropdownOpen && (
                       <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         <Link
@@ -145,7 +131,6 @@ export default function Navbar() {
                           <span>Dashboard</span>
                         </Link>
 
-                        {/* ⭐ NUEVO: Link a Gestión de Canchas */}
                         <Link
                           href="/admin/canchas"
                           onClick={() => setIsAdminDropdownOpen(false)}
@@ -168,13 +153,11 @@ export default function Navbar() {
                   </div>
                 )}
 
-                {/* User Section */}
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                   >
-                    {/* Avatar */}
                     <div className="relative">
                       {session.user.image ? (
                         <img
@@ -194,7 +177,6 @@ export default function Navbar() {
                       )}
                     </div>
 
-                    {/* Name */}
                     <div className="flex items-center space-x-1">
                       <span className="text-sm font-medium text-white">
                         {session.user.name}
@@ -207,10 +189,8 @@ export default function Navbar() {
                     </div>
                   </button>
 
-                  {/* User Dropdown */}
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                      {/* User Info */}
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-medium text-gray-900">
                           {session.user.name}
@@ -227,7 +207,6 @@ export default function Navbar() {
                         )}
                       </div>
 
-                      {/* Menu Items */}
                       <div className="py-1">
                         <Link
                           href="/mis-reservas"
@@ -239,7 +218,6 @@ export default function Navbar() {
                         </Link>
                       </div>
 
-                      {/* Logout */}
                       <div className="border-t border-gray-100 pt-1">
                         <button
                           onClick={() => signOut({ callbackUrl: "/" })}
@@ -256,7 +234,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile - Avatar + Menu Button */}
           <div className="md:hidden flex items-center space-x-3">
             {status === "authenticated" && (
               <div className="relative">
@@ -304,10 +281,8 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-800 py-4 space-y-1">
-            {/* User Info en Mobile */}
             {status === "authenticated" && (
               <div className="px-4 py-3 mb-2 bg-gray-800/80 rounded-lg">
                 <p className="text-sm font-medium text-white">
@@ -327,30 +302,26 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 rounded-lg"
+              className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 rounded-lg"
             >
-              Inicio
+              <Home className="h-4 w-4" />
+              <span>Inicio</span>
             </Link>
             <Link
               href="/canchas"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 rounded-lg"
+              className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 rounded-lg"
             >
-              Canchas
-            </Link>
-            <Link
-              href="/reservar"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 rounded-lg"
-            >
-              Reservar
+              <List className="h-4 w-4" />
+              <span>Canchas</span>
             </Link>
             <Link
               href="/mis-reservas"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 rounded-lg"
+              className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 rounded-lg"
             >
-              Mis Reservas
+              <Calendar className="h-4 w-4" />
+              <span>Mis Reservas</span>
             </Link>
 
             {status === "authenticated" && (
@@ -361,32 +332,35 @@ export default function Navbar() {
                     <Link
                       href="/admin"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
+                      className="flex items-center space-x-3 px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
                     >
-                      📊 Dashboard
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Dashboard</span>
                     </Link>
-                    {/* ⭐ NUEVO: Link mobile a Gestión de Canchas */}
                     <Link
                       href="/admin/canchas"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
+                      className="flex items-center space-x-3 px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
                     >
-                      ⚽ Gestión de Canchas
+                      <Building2 className="h-4 w-4" />
+                      <span>Gestión de Canchas</span>
                     </Link>
                     <Link
                       href="/admin/reservations"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
+                      className="flex items-center space-x-3 px-4 py-2 text-sm text-green-400 hover:bg-gray-800/50 rounded-lg"
                     >
-                      📅 Gestión de Reservas
+                      <Calendar className="h-4 w-4" />
+                      <span>Gestión de Reservas</span>
                     </Link>
                   </>
                 )}
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 rounded-lg"
+                  className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 rounded-lg"
                 >
-                  Cerrar sesión
+                  <LogOut className="h-4 w-4" />
+                  <span>Cerrar sesión</span>
                 </button>
               </>
             )}

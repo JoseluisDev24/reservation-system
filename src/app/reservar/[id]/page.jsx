@@ -1,12 +1,9 @@
-// src/app/reservar/[id]/page.jsx
-
 import ReservationCalendar from "@/components/reservations/ReservationCalendar";
 import { notFound } from "next/navigation";
 import connectDB from "@/lib/mongodb";
 import Resource from "@/models/Resource";
 import Reservation from "@/models/Reservation";
 
-// Traer cancha de MongoDB
 async function getCancha(id) {
   try {
     await connectDB();
@@ -24,19 +21,17 @@ async function getCancha(id) {
   }
 }
 
-// Traer reservas de la cancha
 async function getReservas(canchaId) {
   try {
     await connectDB();
     const reservas = await Reservation.find({
       resourceId: canchaId,
-      status: { $ne: "cancelled" }, // Excluir canceladas
+      status: { $ne: "cancelled" },
     })
       .lean()
       .sort({ date: 1, startTime: 1 });
 
     return reservas.map((reserva) => {
-      // Combinar date + startTime/endTime para crear fechas completas
       const [startHour, startMin] = reserva.startTime.split(":");
       const [endHour, endMin] = reserva.endTime.split(":");
 
@@ -64,7 +59,6 @@ async function getReservas(canchaId) {
 export default async function ReservarPage({ params }) {
   const { id } = await params;
 
-  // Traer cancha y reservas en paralelo (más rápido)
   const [cancha, reservas] = await Promise.all([
     getCancha(id),
     getReservas(id),
@@ -95,7 +89,6 @@ export default async function ReservarPage({ params }) {
             </div>
           </div>
 
-          {/* Amenities */}
           {cancha.amenities && cancha.amenities.length > 0 && (
             <div className="mt-6 pt-6 border-t border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">
@@ -115,11 +108,7 @@ export default async function ReservarPage({ params }) {
           )}
         </div>
 
-        {/* Calendario con reservas - CORREGIDO: Pasar el objeto completo */}
-        <ReservationCalendar 
-          cancha={cancha}  // ← CAMBIO IMPORTANTE: objeto completo
-          reservas={reservas} 
-        />
+        <ReservationCalendar cancha={cancha} reservas={reservas} />
       </div>
     </main>
   );

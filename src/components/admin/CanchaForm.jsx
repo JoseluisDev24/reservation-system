@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { canchaSchema } from "@/lib/validations/cancha.schema";
 import Image from "next/image";
 import { Save, X, Loader2, CheckCircle } from "lucide-react";
+import ScheduleConfig from "@/components/admin/ScheduleConfig";
 
 export default function CanchaForm({
   mode = "create",
@@ -20,13 +21,24 @@ export default function CanchaForm({
     initialData?.amenities || []
   );
 
+  // NUEVO - Estado para horarios
+  const [schedule, setSchedule] = useState(
+    initialData?.schedule || {
+      openTime: "08:00",
+      closeTime: "23:00",
+      slotDuration: 60,
+      availableDays: [1, 2, 3, 4, 5, 6],
+      blockedSlots: [],
+    }
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
   } = useForm({
-    resolver: zodResolver(canchaSchema), 
+    resolver: zodResolver(canchaSchema),
     defaultValues: initialData || {
       name: "",
       type: "Fútbol 5",
@@ -35,6 +47,13 @@ export default function CanchaForm({
       description: "",
       available: true,
       image: "",
+      schedule: {
+        openTime: "08:00",
+        closeTime: "23:00",
+        slotDuration: 60,
+        availableDays: [1, 2, 3, 4, 5, 6],
+        blockedSlots: [],
+      },
     },
   });
 
@@ -84,6 +103,11 @@ export default function CanchaForm({
     );
   };
 
+  // NUEVO - Handler para cambios en schedule
+  const handleScheduleChange = (newSchedule) => {
+    setSchedule(newSchedule);
+  };
+
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
@@ -96,6 +120,7 @@ export default function CanchaForm({
         description: data.description,
         amenities: selectedAmenities,
         available: data.available,
+        schedule: schedule, // NUEVO - Incluir schedule
       };
 
       const imageInput = document.getElementById("image");
@@ -157,6 +182,7 @@ export default function CanchaForm({
       onSubmit={handleSubmit(onSubmit)}
       className="max-w-3xl mx-auto space-y-6"
     >
+      {/* Información Básica */}
       <div>
         <label
           htmlFor="name"
@@ -335,6 +361,9 @@ export default function CanchaForm({
           ))}
         </div>
       </div>
+
+      {/* NUEVO - Componente de configuración de horarios */}
+      <ScheduleConfig schedule={schedule} onChange={handleScheduleChange} />
 
       {mode === "edit" && (
         <div className="flex items-center space-x-3 p-4 bg-gray-800 border border-gray-700 rounded-lg">

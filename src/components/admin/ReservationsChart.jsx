@@ -31,14 +31,12 @@ export default function ReservationsChart({ data }) {
         data={data}
         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
       >
-        {/* Grid de fondo - OSCURO */}
         <CartesianGrid
           strokeDasharray="3 3"
           stroke="#374151"
           vertical={false}
         />
 
-        {/* Eje X (días) - GRIS CLARO */}
         <XAxis
           dataKey="day"
           tick={{ fill: "#9ca3af", fontSize: 12 }}
@@ -46,7 +44,6 @@ export default function ReservationsChart({ data }) {
           tickLine={false}
         />
 
-        {/* Eje Y (cantidad) - GRIS CLARO */}
         <YAxis
           tick={{ fill: "#9ca3af", fontSize: 12 }}
           axisLine={{ stroke: "#4b5563" }}
@@ -54,13 +51,11 @@ export default function ReservationsChart({ data }) {
           allowDecimals={false}
         />
 
-        {/* Tooltip */}
         <Tooltip
           content={<CustomTooltip />}
           cursor={{ fill: "rgba(16, 185, 129, 0.1)" }}
         />
 
-        {/* Barras con animación - VERDE NEÓN */}
         <Bar
           dataKey="count"
           fill="#10b981"

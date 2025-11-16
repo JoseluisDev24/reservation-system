@@ -41,9 +41,9 @@ export async function uploadImage(imageBase64, folder = "canchas") {
 export async function deleteImage(imageUrl) {
   try {
     const parts = imageUrl.split("/");
-    const fileName = parts[parts.length - 1].split(".")[0]; // "abc"
-    const folder = parts[parts.length - 2]; // "canchas"
-    const publicId = `${folder}/${fileName}`; // "canchas/abc"
+    const fileName = parts[parts.length - 1].split(".")[0]; 
+    const folder = parts[parts.length - 2]; 
+    const publicId = `${folder}/${fileName}`; 
   
 
     await cloudinary.uploader.destroy(publicId);

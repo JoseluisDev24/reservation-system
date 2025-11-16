@@ -55,7 +55,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
   }, []);
 
   const handleSelectSlot = (slotInfo) => {
-    console.log("Slot seleccionado:", slotInfo);
 
     const now = new Date();
     const maxDate = new Date();
@@ -88,10 +87,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
     });
   };
 
-  const handleSelectEvent = (event) => {
-    console.log("Evento clickeado:", event);
-  };
-
   const handleViewChange = (view) => {
     setCurrentView(view);
   };
@@ -101,12 +96,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
       alert("Por favor seleccioná un horario");
       return;
     }
-
-    console.log("🔍 Debug - Datos de cancha:", {
-      _id: cancha._id,
-      name: cancha.name,
-      pricePerHour: cancha.pricePerHour,
-    });
 
     setIsModalOpen(true);
   };
@@ -125,8 +114,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
         guests: formData.guests,
         notes: formData.notes || "",
       };
-
-      console.log("📤 Enviando reserva:", reservationData);
 
       const response = await fetch("/api/reservations", {
         method: "POST",
@@ -149,8 +136,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
       if (!response.ok) {
         throw new Error(result.error || "Error al crear la reserva");
       }
-
-      console.log("✅ Reserva creada:", result);
 
       alert(
         `¡Reserva confirmada! 🎉\n\nCódigo: ${result.reservation.confirmationCode}\n\nRecibirás un email con los detalles.`
@@ -194,7 +179,6 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
             currentView={currentView}
             onViewChange={handleViewChange}
             onSelectSlot={handleSelectSlot}
-            onSelectEvent={handleSelectEvent}
             eventStyleGetter={eventStyleGetter}
           />
         )}

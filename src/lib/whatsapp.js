@@ -7,31 +7,21 @@ const client = twilio(
 
 export async function sendWhatsAppConfirmation(reservationData) {
   try {
-    // Formatear teléfono uruguayo automáticamente
-    let phoneNumber = reservationData.userPhone.replace(/\s/g, ""); // Quitar espacios
+    let phoneNumber = reservationData.userPhone.replace(/\s/g, "");
 
-    // Si empieza con 09, convertir a +5989
     if (phoneNumber.startsWith("09")) {
       phoneNumber = "+598" + phoneNumber.substring(1);
-    }
-    // Si empieza con 598, agregar +
-    else if (phoneNumber.startsWith("598")) {
+    } else if (phoneNumber.startsWith("598")) {
       phoneNumber = "+" + phoneNumber;
-    }
-    // Si no empieza con +, agregarlo
-    else if (!phoneNumber.startsWith("+")) {
+    } else if (!phoneNumber.startsWith("+")) {
       phoneNumber = "+598" + phoneNumber;
     }
 
-    console.log(
-      `📞 Teléfono formateado: ${reservationData.userPhone} → ${phoneNumber}`
-    );
+    const formattedDate = formatDate(reservationData.date);
 
-    const message = `
-    Reservá5.
-¡Reserva confirmada! ⚽
+    const message = `¡Reserva confirmada! ⚽
 
-📅 *${formatDate(reservationData.date)}*
+📅 *${formattedDate}*
 ⏰ ${reservationData.startTime} - ${reservationData.endTime}
 🏟️ ${reservationData.resourceName}
 💰 $${reservationData.totalPrice} UYU
@@ -39,7 +29,8 @@ export async function sendWhatsAppConfirmation(reservationData) {
 🔑 Código: *${reservationData.confirmationCode}*
 
 ¡Nos vemos pronto! 🙌
-`.trim();
+
+_Reservá5_`;
 
     const response = await client.messages.create({
       from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
@@ -47,10 +38,9 @@ export async function sendWhatsAppConfirmation(reservationData) {
       body: message,
     });
 
-    console.log("✅ WhatsApp enviado:", response.sid);
     return { success: true, sid: response.sid };
   } catch (error) {
-    console.error("❌ Error enviando WhatsApp:", error);
+    console.error("Error enviando WhatsApp:", error.message);
     return { success: false, error: error.message };
   }
 }

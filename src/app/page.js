@@ -1,11 +1,15 @@
-import Hero from "@/components/sections/Hero";
-import HowItWorks from "@/components/sections/HowItWorks";
+import Hero from "@/components/home/Hero";
+import HowItWorks from "@/components/home/HowItWorks";
+import Features from "@/components/home/Features";
+import Stats from "@/components/home/Stats";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div>
+    <main className="min-h-screen">
       <Hero />
       <HowItWorks />
-    </div>
+      <Stats />
+      <Features />
+    </main>
   );
 }

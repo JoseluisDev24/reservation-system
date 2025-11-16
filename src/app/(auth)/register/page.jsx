@@ -16,14 +16,12 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Manejo de registro
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // 1. Llamar al endpoint de registro
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,7 +36,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // 2. Si el registro fue exitoso, hacer login automáticamente
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
@@ -58,7 +55,6 @@ export default function RegisterPage() {
     }
   };
 
-  // Manejo de login con Google
   const handleGoogleRegister = async () => {
     setLoading(true);
     try {
@@ -72,9 +68,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
       <div className="w-full max-w-md">
-        {/* Card principal */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Crear cuenta
@@ -84,14 +78,12 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          {/* Error message */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600 text-center">{error}</p>
             </div>
           )}
 
-          {/* Google Register Button */}
           <button
             onClick={handleGoogleRegister}
             disabled={loading}
@@ -118,7 +110,6 @@ export default function RegisterPage() {
             Registrarse con Google
           </button>
 
-          {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
@@ -130,7 +121,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Register Form */}
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
               <label

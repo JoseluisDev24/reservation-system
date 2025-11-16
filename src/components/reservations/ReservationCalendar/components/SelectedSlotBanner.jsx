@@ -1,11 +1,6 @@
-// src/components/reservations/ReservationCalendar/components/SelectedSlotBanner.jsx
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-/**
- * Banner azul que muestra el horario seleccionado
- * Aparece cuando el usuario selecciona un slot
- */
 export default function SelectedSlotBanner({
   selectedSlot,
   onCancel,
@@ -16,7 +11,6 @@ export default function SelectedSlotBanner({
   return (
     <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-400 rounded-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Información del slot */}
         <div>
           <p className="font-semibold text-blue-900">
             Horario seleccionado:{" "}
@@ -28,7 +22,6 @@ export default function SelectedSlotBanner({
           </p>
         </div>
 
-        {/* Botones */}
         <div className="flex gap-2">
           <button
             onClick={onCancel}

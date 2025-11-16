@@ -52,6 +52,52 @@ export const canchaSchema = z.object({
   image: z.string().optional().or(z.literal("")),
 
   available: z.boolean().default(true),
+
+  // NUEVO - Validaciones para schedule
+  schedule: z
+    .object({
+      openTime: z
+        .string()
+        .regex(
+          /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+          "Formato de hora inválido (HH:MM)"
+        )
+        .default("08:00"),
+      closeTime: z
+        .string()
+        .regex(
+          /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+          "Formato de hora inválido (HH:MM)"
+        )
+        .default("23:00"),
+      slotDuration: z
+        .number()
+        .int()
+        .min(15, "Duración mínima: 15 minutos")
+        .max(240, "Duración máxima: 4 horas")
+        .default(60),
+      availableDays: z
+        .array(z.number().min(0).max(6))
+        .min(1, "Debe seleccionar al menos un día")
+        .default([1, 2, 3, 4, 5, 6]),
+      blockedSlots: z
+        .array(
+          z.object({
+            day: z.number().min(0).max(6),
+            time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+          })
+        )
+        .optional()
+        .default([]),
+    })
+    .optional()
+    .default({
+      openTime: "08:00",
+      closeTime: "23:00",
+      slotDuration: 60,
+      availableDays: [1, 2, 3, 4, 5, 6],
+      blockedSlots: [],
+    }),
 });
 
 export const createCanchaSchema = canchaSchema;

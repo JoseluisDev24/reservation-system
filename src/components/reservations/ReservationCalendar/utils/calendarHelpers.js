@@ -1,15 +1,8 @@
-// src/components/reservations/ReservationCalendar/utils/calendarHelpers.js
-
-/**
- * Función que retorna los estilos para cada evento del calendario
- * Usada por react-big-calendar para colorear los eventos
- */
 export const eventStyleGetter = (event) => {
-  // Estilo especial para el slot seleccionado por el usuario
   if (event.resource?.isSelected) {
     return {
       style: {
-        backgroundColor: "#3b82f6", // Azul
+        backgroundColor: "#3b82f6",
         borderRadius: "5px",
         opacity: 0.9,
         color: "white",
@@ -21,10 +14,9 @@ export const eventStyleGetter = (event) => {
     };
   }
 
-  // Estilos para reservas existentes según su estado
   const style = {
     backgroundColor:
-      event.resource.status === "confirmed" ? "#10b981" : "#f59e0b", // Verde o Amarillo
+      event.resource.status === "confirmed" ? "#10b981" : "#f59e0b",
     borderRadius: "5px",
     opacity: 0.8,
     color: "white",
@@ -37,9 +29,6 @@ export const eventStyleGetter = (event) => {
   return { style };
 };
 
-/**
- * Mensajes traducidos para react-big-calendar
- */
 export const calendarMessages = {
   next: "Siguiente",
   previous: "Anterior",
@@ -55,13 +44,10 @@ export const calendarMessages = {
   showMore: (total) => `+ Ver más (${total})`,
 };
 
-/**
- * Configuración de horarios del calendario
- */
 export const calendarConfig = {
-  minHour: 8, // 8 AM
-  maxHour: 23, // 11 PM
-  step: 60, // Slots de 1 hora
+  minHour: 8,
+  maxHour: 23,
+  step: 60,
   timeslots: 1,
   views: ["month", "week", "day"],
   defaultView: "week",

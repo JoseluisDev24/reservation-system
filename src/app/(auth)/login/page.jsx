@@ -5,7 +5,6 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-// Componente separado que usa useSearchParams
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,7 +17,6 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Manejo de login con credenciales
   const handleCredentialsLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -44,7 +42,6 @@ function LoginForm() {
     }
   };
 
-  // Manejo de login con Google
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
@@ -58,9 +55,7 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
       <div className="w-full max-w-md">
-        {/* Card principal */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Bienvenido a Reservá5
@@ -70,14 +65,12 @@ function LoginForm() {
             </p>
           </div>
 
-          {/* Error message */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600 text-center">{error}</p>
             </div>
           )}
 
-          {/* Google Login Button */}
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
@@ -104,7 +97,6 @@ function LoginForm() {
             Continuar con Google
           </button>
 
-          {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
@@ -116,7 +108,6 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* Credentials Form */}
           <form onSubmit={handleCredentialsLogin} className="space-y-4">
             <div>
               <label
@@ -167,7 +158,6 @@ function LoginForm() {
             </button>
           </form>
 
-          {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               ¿No tienes cuenta?{" "}
@@ -181,7 +171,6 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Back to home */}
         <div className="mt-6 text-center">
           <Link
             href="/"
@@ -195,7 +184,6 @@ function LoginForm() {
   );
 }
 
-// Componente principal con Suspense
 export default function LoginPage() {
   return (
     <Suspense

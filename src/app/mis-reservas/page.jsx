@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import connectDB from "@/lib/mongodb";
 import Reservation from "@/models/Reservation";
-import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
+import Image from "next/image";
+import { Calendar, Clock, MapPin, DollarSign, Ticket } from "lucide-react";
 import CancelReservationButton from "@/components/reservations/CancelReservationButton";
 
 export default async function MisReservasPage() {
@@ -46,7 +47,7 @@ export default async function MisReservasPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
-      <div className="max-w-4xl mx-auto px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-light text-gray-900 mb-2">
             Mis Reservas
@@ -77,37 +78,52 @@ export default async function MisReservasPage() {
             {reservationsData.map((reserva) => (
               <div
                 key={reserva.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition"
+                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                {/* Header con imagen y nombre */}
+                <div className="flex items-start gap-4 p-4 sm:p-6">
+                  {/* Imagen - más pequeña y redondeada */}
+                  {reserva.resource.image && (
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-xl overflow-hidden border-2 border-gray-100">
+                      <Image
+                        src={reserva.resource.image}
+                        alt={reserva.resource.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {/* Info principal */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
                         {reserva.resource.name}
                       </h3>
                       <StatusBadge status={reserva.status} />
                     </div>
 
-                    <div className="space-y-2 text-sm text-gray-600">
+                    {/* Detalles de la reserva */}
+                    <div className="space-y-1.5 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{reserva.date}</span>
+                        <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{reserva.date}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         <span>
                           {reserva.startTime} - {reserva.endTime}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        <span className="font-medium text-gray-900">
+                        <DollarSign className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <span className="font-semibold text-green-600">
                           ${reserva.totalPrice}
                         </span>
                       </div>
                       {reserva.confirmationCode && (
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
+                          <Ticket className="h-4 w-4 text-gray-400 flex-shrink-0" />
                           <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
                             {reserva.confirmationCode}
                           </span>
@@ -115,19 +131,12 @@ export default async function MisReservasPage() {
                       )}
                     </div>
                   </div>
-
-                  {reserva.resource.image && (
-                    <img
-                      src={reserva.resource.image}
-                      alt={reserva.resource.name}
-                      className="w-24 h-24 rounded-lg object-cover ml-4"
-                    />
-                  )}
                 </div>
 
+                {/* Footer con botón de cancelar */}
                 {reserva.status === "confirmed" && (
-                  <div className="border-t border-gray-100 pt-4 mt-4">
-                    <div className="flex items-center justify-between">
+                  <div className="bg-gray-50 px-4 py-3 sm:px-6 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <span className="text-sm text-gray-600">
                         ¿Cambió tus planes?
                       </span>
@@ -159,7 +168,7 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${styles[status]}`}
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${styles[status]} flex-shrink-0`}
     >
       {labels[status]}
     </span>

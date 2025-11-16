@@ -1,5 +1,3 @@
-// src/app/api/canchas/[id]/route.js
-
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
@@ -27,7 +25,6 @@ export async function GET(request, { params }) {
       cancha,
     });
   } catch (error) {
-    console.error("Error obteniendo cancha:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
@@ -120,18 +117,13 @@ export async function PUT(request, { params }) {
     }
 
     if (imageFile) {
-      console.log("📤 Subiendo nueva imagen a Cloudinary...");
-
       const newImageUrl = await uploadImage(imageFile, "canchas");
       validatedData.image = newImageUrl;
-
-      console.log("✅ Nueva imagen subida:", newImageUrl);
 
       if (
         canchaExistente.image &&
         !canchaExistente.image.includes("default-cancha")
       ) {
-        console.log("🗑️ Eliminando imagen anterior...");
         await deleteImage(canchaExistente.image);
       }
     }
@@ -148,16 +140,12 @@ export async function PUT(request, { params }) {
       }
     ).populate("owner", "name email");
 
-    console.log("✅ Cancha actualizada exitosamente:", canchaActualizada._id);
-
     return NextResponse.json({
       success: true,
       message: "Cancha actualizada exitosamente",
       cancha: canchaActualizada,
     });
   } catch (error) {
-    console.error("❌ Error actualizando cancha:", error);
-
     if (error.name === "ValidationError") {
       return NextResponse.json(
         {
@@ -221,21 +209,16 @@ export async function DELETE(request, { params }) {
     }
 
     if (cancha.image && !cancha.image.includes("default-cancha")) {
-      console.log("🗑️ Eliminando imagen de Cloudinary...");
       await deleteImage(cancha.image);
     }
 
-    // 5. ELIMINAR CANCHA DE MONGODB
     await Resource.findByIdAndDelete(id);
-
-    console.log("✅ Cancha eliminada exitosamente:", id);
 
     return NextResponse.json({
       success: true,
       message: "Cancha eliminada exitosamente",
     });
   } catch (error) {
-    console.error("❌ Error eliminando cancha:", error);
     return NextResponse.json(
       {
         success: false,

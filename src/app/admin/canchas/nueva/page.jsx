@@ -1,11 +1,8 @@
-// src/app/admin/canchas/nueva/page.js
-
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import CanchaForm from "@/components/admin/CanchaForm";
 import Link from "next/link";
-import { Plus, Lightbulb } from "lucide-react"; 
-
+import { Plus, Lightbulb } from "lucide-react";
 
 export default async function NuevaCanchaPage() {
   const session = await auth();
