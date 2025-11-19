@@ -8,6 +8,7 @@ import { canchaSchema } from "@/lib/validations/cancha.schema";
 import Image from "next/image";
 import { Save, X, Loader2, CheckCircle } from "lucide-react";
 import ScheduleConfig from "@/components/admin/ScheduleConfig";
+import toast from "react-hot-toast";
 
 export default function CanchaForm({
   mode = "create",
@@ -21,7 +22,6 @@ export default function CanchaForm({
     initialData?.amenities || []
   );
 
-  // NUEVO - Estado para horarios
   const [schedule, setSchedule] = useState(
     initialData?.schedule || {
       openTime: "08:00",
@@ -81,12 +81,12 @@ export default function CanchaForm({
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        alert("Por favor selecciona un archivo de imagen válido");
+        toast.error("Por favor seleccioná un archivo de imagen válido");
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        alert("La imagen no debe superar los 5MB");
+        toast.error("La imagen no debe superar los 5MB");
         return;
       }
 
@@ -103,7 +103,6 @@ export default function CanchaForm({
     );
   };
 
-  // NUEVO - Handler para cambios en schedule
   const handleScheduleChange = (newSchedule) => {
     setSchedule(newSchedule);
   };
@@ -120,7 +119,7 @@ export default function CanchaForm({
         description: data.description,
         amenities: selectedAmenities,
         available: data.available,
-        schedule: schedule, // NUEVO - Incluir schedule
+        schedule: schedule, 
       };
 
       const imageInput = document.getElementById("image");
@@ -130,7 +129,7 @@ export default function CanchaForm({
         const imageBase64 = await convertToBase64(imageFile);
         formData.imageFile = imageBase64;
       } else if (mode === "create") {
-        alert("Por favor selecciona una imagen");
+        toast.error("Por favor seleccioná una imagen");
         setIsLoading(false);
         return;
       }
@@ -139,6 +138,10 @@ export default function CanchaForm({
         mode === "create" ? "/api/canchas" : `/api/canchas/${canchaId}`;
 
       const method = mode === "create" ? "POST" : "PUT";
+
+      const loadingToast = toast.loading(
+        mode === "create" ? "Creando cancha..." : "Actualizando cancha..."
+      );
 
       const response = await fetch(url, {
         method,
@@ -150,13 +153,17 @@ export default function CanchaForm({
 
       const result = await response.json();
 
+      toast.dismiss(loadingToast);
+
+
       if (result.success) {
-        alert(
+        toast.success(
           result.message ||
             `Cancha ${
               mode === "create" ? "creada" : "actualizada"
             } exitosamente`
         );
+        
         router.push("/admin/canchas");
         router.refresh();
       } else {
@@ -164,14 +171,14 @@ export default function CanchaForm({
           const errorMessages = result.details
             .map((detail) => `${detail.field}: ${detail.message}`)
             .join("\n");
-          alert("Errores de validación:\n\n" + errorMessages);
+          toast.error(`Errores de validación:\n${errorMessages}`);
         } else {
-          alert("Error: " + result.error);
+          toast.error(result.error || "Error al guardar la cancha");
         }
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al guardar la cancha");
+      toast.error("Error de conexión al guardar la cancha");
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +189,6 @@ export default function CanchaForm({
       onSubmit={handleSubmit(onSubmit)}
       className="max-w-3xl mx-auto space-y-6"
     >
-      {/* Información Básica */}
       <div>
         <label
           htmlFor="name"
@@ -362,7 +368,6 @@ export default function CanchaForm({
         </div>
       </div>
 
-      {/* NUEVO - Componente de configuración de horarios */}
       <ScheduleConfig schedule={schedule} onChange={handleScheduleChange} />
 
       {mode === "edit" && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronRight, Check, X } from "lucide-react";
 
 export default function ScheduleConfig({ schedule, onChange }) {
@@ -25,7 +25,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
     { value: 6, label: "Sábado" },
   ];
 
-  // Generar slots de tiempo basados en openTime, closeTime y slotDuration
   const generateTimeSlots = () => {
     const slots = [];
     const [openHour, openMin] = localSchedule.openTime.split(":").map(Number);
@@ -45,7 +44,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
       ).padStart(2, "0")}`;
       slots.push(timeStr);
 
-      // Agregar duración del slot
       currentMin += localSchedule.slotDuration;
       if (currentMin >= 60) {
         currentHour += Math.floor(currentMin / 60);
@@ -58,21 +56,18 @@ export default function ScheduleConfig({ schedule, onChange }) {
 
   const timeSlots = generateTimeSlots();
 
-  // Toggle día expandido/colapsado
   const toggleDay = (day) => {
     setExpandedDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
     );
   };
 
-  // Verificar si un slot está bloqueado
   const isSlotBlocked = (day, time) => {
     return localSchedule.blockedSlots?.some(
       (slot) => slot.day === day && slot.time === time
     );
   };
 
-  // Toggle bloquear/desbloquear slot
   const toggleSlot = (day, time) => {
     const isBlocked = isSlotBlocked(day, time);
 
@@ -91,7 +86,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
     onChange?.(updated);
   };
 
-  // Actualizar horario de apertura/cierre
   const updateTime = (field, value) => {
     const updated = {
       ...localSchedule,
@@ -101,7 +95,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
     onChange?.(updated);
   };
 
-  // Toggle día disponible
   const toggleAvailableDay = (day) => {
     const newAvailableDays = localSchedule.availableDays.includes(day)
       ? localSchedule.availableDays.filter((d) => d !== day)
@@ -116,7 +109,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
     onChange?.(updated);
   };
 
-  // Actualizar duración del slot
   const updateSlotDuration = (duration) => {
     const updated = {
       ...localSchedule,
@@ -128,14 +120,12 @@ export default function ScheduleConfig({ schedule, onChange }) {
 
   return (
     <div className="space-y-6">
-      {/* Configuración general */}
       <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h3 className="text-lg font-semibold text-white mb-4">
           Configuración de Horarios
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Hora apertura */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Hora de apertura
@@ -148,7 +138,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
             />
           </div>
 
-          {/* Hora cierre */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Hora de cierre
@@ -161,7 +150,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
             />
           </div>
 
-          {/* Duración del slot */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Duración por turno
@@ -179,7 +167,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
           </div>
         </div>
 
-        {/* Días disponibles */}
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-300 mb-3">
             Días disponibles
@@ -203,7 +190,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
         </div>
       </div>
 
-      {/* Configuración de slots por día */}
       <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h3 className="text-lg font-semibold text-white mb-4">
           Bloquear Horarios Específicos
@@ -220,7 +206,6 @@ export default function ScheduleConfig({ schedule, onChange }) {
                 key={day.value}
                 className="border border-gray-700 rounded-lg overflow-hidden"
               >
-                {/* Header del día */}
                 <button
                   type="button"
                   onClick={() => toggleDay(day.value)}

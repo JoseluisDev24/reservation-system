@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ReservationModal from "@/components/shared/ReservationModal";
+import toast from "react-hot-toast";
 
 import { useSlotValidation } from "../hooks/useSlotValidation";
 import { useAvailableSlots } from "../hooks/useAvailableSlots";
@@ -55,28 +56,25 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
   }, []);
 
   const handleSelectSlot = (slotInfo) => {
-
     const now = new Date();
     const maxDate = new Date();
     maxDate.setDate(now.getDate() + 14);
 
     if (slotInfo.start < now) {
-      alert(
-        "❌ No podés reservar en el pasado.\n\nPor favor seleccioná una fecha futura."
+      toast.error(
+        "No podés reservar en el pasado. Por favor seleccioná una fecha futura."
       );
       return;
     }
 
     if (slotInfo.start > maxDate) {
-      alert(
-        "❌ Solo podés reservar con hasta 2 semanas de anticipación.\n\nPor favor seleccioná una fecha más cercana."
-      );
+      toast.error("Solo podés reservar con hasta 2 semanas de anticipación.");
       return;
     }
 
     if (isSlotOccupied(slotInfo.start, slotInfo.end)) {
-      alert(
-        "❌ Este horario ya está reservado.\n\nPor favor seleccioná otro horario."
+      toast.error(
+        "Este horario ya está reservado. Por favor seleccioná otro horario."
       );
       return;
     }
@@ -93,7 +91,7 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
 
   const handleConfirmClick = () => {
     if (!selectedSlot) {
-      alert("Por favor seleccioná un horario");
+      toast.error("Por favor seleccioná un horario");
       return;
     }
 
@@ -102,6 +100,7 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
 
   const handleReservationSubmit = async (formData) => {
     setIsSubmitting(true);
+    const loadingToast = toast.loading("Creando tu reserva...");
 
     try {
       const reservationData = {
@@ -133,21 +132,27 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
 
       const result = await response.json();
 
+      toast.dismiss(loadingToast);
+
       if (!response.ok) {
         throw new Error(result.error || "Error al crear la reserva");
       }
 
-      alert(
-        `¡Reserva confirmada! 🎉\n\nCódigo: ${result.reservation.confirmationCode}\n\nRecibirás un email con los detalles.`
+      toast.success(
+        `¡Reserva confirmada! 🎉\nCódigo: ${result.reservation.confirmationCode}`,
+        { duration: 5000 }
       );
 
       setIsModalOpen(false);
       setSelectedSlot(null);
 
-      router.push("/");
+      setTimeout(() => {
+        router.push("/mis-reservas");
+      }, 1500);
     } catch (error) {
+      toast.dismiss(loadingToast);
       console.error("❌ Error completo:", error);
-      alert(`Error al crear la reserva:\n\n${error.message}`);
+      toast.error(error.message || "Error al crear la reserva");
     } finally {
       setIsSubmitting(false);
     }

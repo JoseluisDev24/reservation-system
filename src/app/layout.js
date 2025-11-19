@@ -3,6 +3,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
+import ToastProvider from "@/components/providers/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 const bebasNeue = Bebas_Neue({
-  weight: "400", 
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-bebas",
 });
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
           <Navbar />
           {children}
           <Footer />
+          <ToastProvider />
         </SessionProvider>
       </body>
     </html>

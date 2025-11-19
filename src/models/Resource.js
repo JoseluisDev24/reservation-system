@@ -63,7 +63,6 @@ const resourceSchema = new mongoose.Schema(
       index: true,
     },
 
-    // NUEVO - Configuración de horarios
     schedule: {
       openTime: {
         type: String,
@@ -75,20 +74,20 @@ const resourceSchema = new mongoose.Schema(
       },
       slotDuration: {
         type: Number,
-        default: 60, // minutos por slot
+        default: 60, 
       },
       availableDays: {
-        type: [Number], // 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
-        default: [1, 2, 3, 4, 5, 6], // Lunes a Sábado por defecto
+        type: [Number], 
+        default: [1, 2, 3, 4, 5, 6], 
       },
       blockedSlots: [
         {
           day: {
-            type: Number, // 0-6
+            type: Number, 
             required: true,
           },
           time: {
-            type: String, // "14:00"
+            type: String, 
             required: true,
           },
         },

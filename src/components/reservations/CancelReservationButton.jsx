@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { X, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function CancelReservationButton({ reservationId }) {
   const [isLoading, setIsLoading] = useState(false);
-
   const router = useRouter();
 
   const handleCancel = async () => {
@@ -17,28 +18,29 @@ export default function CancelReservationButton({ reservationId }) {
     if (!confirmed) return;
 
     setIsLoading(true);
+    const loadingToast = toast.loading("Cancelando reserva...");
 
     try {
       const response = await fetch(`/api/reservations/${reservationId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status: "cancelled",
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "cancelled" }),
       });
 
+      const result = await response.json();
+
+      toast.dismiss(loadingToast);
+
       if (response.ok) {
+        toast.success("Reserva cancelada exitosamente");
         router.refresh();
-        alert("✅ Reserva cancelada exitosamente");
       } else {
-        const data = await response.json();
-        alert(`❌ Error: ${data.error || "No se pudo cancelar la reserva"}`);
+        toast.error(result.error || "Error al cancelar la reserva");
       }
     } catch (error) {
+      toast.dismiss(loadingToast);
       console.error("Error al cancelar reserva:", error);
-      alert("❌ Error de conexión. Intentá de nuevo.");
+      toast.error("Error de conexión");
     } finally {
       setIsLoading(false);
     }
@@ -48,16 +50,23 @@ export default function CancelReservationButton({ reservationId }) {
     <button
       onClick={handleCancel}
       disabled={isLoading}
-      className={`
-        px-4 py-2 rounded-lg font-medium transition-colors
-        ${
-          isLoading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-red-600 hover:bg-red-700 text-white"
-        }
-      `}
+      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+        isLoading
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+          : "bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow-md active:scale-95"
+      }`}
     >
-      {isLoading ? "Cancelando..." : "Cancelar Reserva"}
+      {isLoading ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Cancelando...</span>
+        </>
+      ) : (
+        <>
+          <X className="h-4 w-4" />
+          <span>Cancelar Reserva</span>
+        </>
+      )}
     </button>
   );
 }

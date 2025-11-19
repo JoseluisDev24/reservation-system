@@ -13,7 +13,7 @@ import Link from "next/link";
 
 export default function ResourceCard({ resource }) {
   return (
-    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
       <div className="relative h-48 overflow-hidden">
         <Image
           src={resource.image}
@@ -30,7 +30,7 @@ export default function ResourceCard({ resource }) {
         <CardTitle className="text-xl">{resource.name}</CardTitle>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="flex-grow">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-gray-600">
             <Users className="w-4 h-4" />
@@ -49,7 +49,7 @@ export default function ResourceCard({ resource }) {
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between items-center border-t pt-4">
+      <CardFooter className="flex justify-between items-center border-t pt-4 mt-auto">
         <div>
           <p className="text-2xl font-bold text-green-600">
             ${resource.pricePerHour}
