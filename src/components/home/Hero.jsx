@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 export default function Hero() {
   const scrollToSection = () => {
@@ -11,14 +12,17 @@ export default function Hero() {
 
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-[center_50%] md:bg-[center_30%]"
-        style={{
-          backgroundImage: "url(/hero.webp)",
-        }}
-      ></div>
+      <Image
+        src="/hero.webp"
+        alt="Cancha de fútbol"
+        fill
+        priority
+        quality={90}
+        sizes="100vw"
+        className="object-cover object-[center_50%] md:object-[center_30%]"
+      />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-[1]"></div>
 
       <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto w-full">
         <div className="h-10 mb-5"></div>
