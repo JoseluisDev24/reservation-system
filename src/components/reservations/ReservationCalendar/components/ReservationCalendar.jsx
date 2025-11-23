@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ReservationModal from "@/components/shared/ReservationModal";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 import { useSlotValidation } from "../hooks/useSlotValidation";
 import { useAvailableSlots } from "../hooks/useAvailableSlots";
@@ -43,8 +44,8 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { isSlotOccupied, isSlotValid } = useSlotValidation(reservas);
-  const availableSlots = useAvailableSlots(reservas, isSlotValid);
-  const events = useCalendarEvents(reservas, selectedSlot);
+  const availableSlots = useAvailableSlots(reservas, isSlotValid, cancha);
+  const events = useCalendarEvents(reservas, selectedSlot, cancha);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -60,6 +61,25 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
     const maxDate = new Date();
     maxDate.setDate(now.getDate() + 14);
 
+    const dayOfWeek = slotInfo.start.getDay();
+    const availableDays = cancha?.schedule?.availableDays || [
+      0, 1, 2, 3, 4, 5, 6,
+    ];
+
+    if (!availableDays.includes(dayOfWeek)) {
+      const dayNames = [
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+      ];
+      toast.error(`${dayNames[dayOfWeek]} no está disponible para reservas.`);
+      return;
+    }
+
     if (slotInfo.start < now) {
       toast.error(
         "No podés reservar en el pasado. Por favor seleccioná una fecha futura."
@@ -69,6 +89,22 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
 
     if (slotInfo.start > maxDate) {
       toast.error("Solo podés reservar con hasta 2 semanas de anticipación.");
+      return;
+    }
+
+    const timeString = `${slotInfo.start
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:00`;
+    const blockedSlots = cancha?.schedule?.blockedSlots || [];
+    const isBlocked = blockedSlots.some(
+      (slot) => slot.day === dayOfWeek && slot.time === timeString
+    );
+
+    if (isBlocked) {
+      toast.error(
+        "Este horario específico está bloqueado. Por favor seleccioná otro horario."
+      );
       return;
     }
 
@@ -185,6 +221,7 @@ export default function ReservationCalendar({ cancha, reservas = [] }) {
             onViewChange={handleViewChange}
             onSelectSlot={handleSelectSlot}
             eventStyleGetter={eventStyleGetter}
+            cancha={cancha}
           />
         )}
 

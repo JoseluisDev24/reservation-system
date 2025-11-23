@@ -1,21 +1,47 @@
 import { useMemo } from "react";
 
 /**
- * @param {Array} reservas
- * @param {Function} isSlotValid
+ * @param {Array} reservas 
+ * @param {Function} isSlotValid 
+ * @param {Object} cancha 
  * @returns {Array}
  */
-export function useAvailableSlots(reservas, isSlotValid) {
+export function useAvailableSlots(reservas, isSlotValid, cancha) {
   const availableSlots = useMemo(() => {
     const slots = [];
     const today = new Date();
 
-    for (let day = 0; day < 7; day++) {
+    const schedule = cancha?.schedule || {};
+    const openTime = schedule.openTime || "08:00";
+    const closeTime = schedule.closeTime || "23:00";
+    const blockedSlots = schedule.blockedSlots || [];
+    const availableDays = schedule.availableDays || [0, 1, 2, 3, 4, 5, 6];
+
+    const [openHour] = openTime.split(":").map(Number);
+    const [closeHour] = closeTime.split(":").map(Number);
+
+    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
       const date = new Date(today);
-      date.setDate(date.getDate() + day);
+      date.setDate(date.getDate() + dayOffset);
       date.setHours(0, 0, 0, 0);
 
-      for (let hour = 8; hour < 23; hour++) {
+      const dayOfWeek = date.getDay();
+
+      if (!availableDays.includes(dayOfWeek)) {
+        continue;
+      }
+
+      for (let hour = openHour; hour < closeHour; hour++) {
+        const timeString = `${hour.toString().padStart(2, "0")}:00`;
+
+        const isBlocked = blockedSlots.some(
+          (slot) => slot.day === dayOfWeek && slot.time === timeString
+        );
+
+        if (isBlocked) {
+          continue;
+        }
+
         const start = new Date(date);
         start.setHours(hour, 0, 0, 0);
 
@@ -29,7 +55,7 @@ export function useAvailableSlots(reservas, isSlotValid) {
     }
 
     return slots;
-  }, [reservas, isSlotValid]);
+  }, [reservas, isSlotValid, cancha]);
 
   return availableSlots;
 }

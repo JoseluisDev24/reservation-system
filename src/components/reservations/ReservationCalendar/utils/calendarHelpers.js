@@ -14,6 +14,38 @@ export const eventStyleGetter = (event) => {
     };
   }
 
+  if (event.resource?.isBlocked) {
+    return {
+      style: {
+        backgroundColor: "#ef4444",
+        borderRadius: "5px",
+        opacity: 0.3,
+        color: "white",
+        border: "1px solid #dc2626",
+        display: "block",
+        fontSize: "0.875rem",
+        fontWeight: "500",
+        cursor: "not-allowed",
+      },
+    };
+  }
+
+  if (event.resource?.isBlockedSlot) {
+    return {
+      style: {
+        backgroundColor: "#f59e0b",
+        borderRadius: "5px",
+        opacity: 0.5,
+        color: "white",
+        border: "1px solid #d97706",
+        display: "block",
+        fontSize: "0.875rem",
+        fontWeight: "500",
+        cursor: "not-allowed",
+      },
+    };
+  }
+
   const style = {
     backgroundColor:
       event.resource.status === "confirmed" ? "#10b981" : "#f59e0b",

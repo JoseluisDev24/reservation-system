@@ -83,6 +83,7 @@ export async function PUT(request, { params }) {
       amenities,
       available,
       imageFile,
+      schedule,
     } = body;
 
     let validatedData;
@@ -128,13 +129,18 @@ export async function PUT(request, { params }) {
       }
     }
 
+    const updateData = {
+      ...validatedData,
+      owner: canchaExistente.owner,
+    };
+
+    if (schedule) {
+      updateData.schedule = schedule;
+    }
+
     const canchaActualizada = await Resource.findByIdAndUpdate(
       id,
-      {
-        ...validatedData,
-        owner: canchaExistente.owner,
-      },
-      {
+      updateData, {
         new: true,
         runValidators: true,
       }

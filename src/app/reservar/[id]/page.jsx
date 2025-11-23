@@ -14,6 +14,28 @@ async function getCancha(id) {
     return {
       ...cancha,
       _id: cancha._id.toString(),
+      createdAt: cancha.createdAt?.toISOString(),
+      updatedAt: cancha.updatedAt?.toISOString(),
+      schedule: cancha.schedule
+        ? {
+            openTime: cancha.schedule.openTime || "08:00",
+            closeTime: cancha.schedule.closeTime || "23:00",
+            slotDuration: cancha.schedule.slotDuration || 60,
+            availableDays: cancha.schedule.availableDays || [
+              0, 1, 2, 3, 4, 5, 6,
+            ],
+            blockedSlots: (cancha.schedule.blockedSlots || []).map((slot) => ({
+              day: slot.day,
+              time: slot.time,
+            })),
+          }
+        : {
+            openTime: "08:00",
+            closeTime: "23:00",
+            slotDuration: 60,
+            availableDays: [0, 1, 2, 3, 4, 5, 6],
+            blockedSlots: [],
+          },
     };
   } catch (error) {
     console.error("Error al traer cancha:", error);
